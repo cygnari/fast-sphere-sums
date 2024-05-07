@@ -1,4 +1,6 @@
-add_libary(FastSphereSums
+add_library(FastSphereSums
+    general_utils.cpp
+    initialize_tree.cpp
     mpi_utils.cpp)
 
 target_link_libraries(FastSphereSums PUBLIC MPI::MPI_C LAPACK::LAPACK)
@@ -10,6 +12,7 @@ target_include_directories(FastSphereSums PUBLIC
 install(FILES
     # all FastSphereSums header/include files go here
     ${CMAKE_BINARY_DIR}/fast-sphere-sums-config.h
+    initialize_tree.hpp
     mpi_utils.hpp
     structs.hpp
     DESTINATION ${PROJECT_SOURCE_DIR}/include)
