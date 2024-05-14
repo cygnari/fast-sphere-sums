@@ -15,12 +15,16 @@ int main(int argc, char **argv) {
   MPI_Status status;
   MPI_Comm_size(MPI_COMM_WORLD, &P);
   MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-
-  std::vector<double> test_vec {-0.5, -0.4, 1};
-  std::vector<double> on_sphere = cube_to_sphere(test_vec);
-  std::cout << on_sphere[0] << "," << on_sphere[1] << "," << on_sphere[2] << std::endl;
-  std::vector<double> on_cube = sphere_to_cube(on_sphere);
-  std::cout << on_cube[0] << "," << on_cube[1] << "," << on_cube[2] << std::endl;
+  // std::
+  std::vector<double> xyz;
+  std::vector<double> xieta;
+  for (int i = 1; i < 7; i++) {
+    xyz = xyz_from_xieta(0, 0, i);
+    std::cout << "face " << i << " xyz " << xyz[0] << "," << xyz[1] << "," << xyz[2] << std::endl;
+    xieta = xieta_from_xyz(xyz[0], xyz[1], xyz[2]);
+    // xieta = xieta_from_xyz(xyz[0], xyz[1], xyz[2], i);
+    std::cout << xieta[0] << "," << xieta[1] << std::endl;
+  }
 
 
   MPI_Finalize();

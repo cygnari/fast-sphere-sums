@@ -3,6 +3,9 @@
 #include <cmath>
 #include <tuple>
 #include <cassert>
+#include <iostream>
+
+#include "structs.hpp"
 
 extern "C" { // lapack
 extern int dgesv_(int *, int *, double *, int *, int *, double *, int *, int *);
@@ -47,32 +50,33 @@ int linear_solve(const std::vector<double> &a_matrix, std::vector<double> &b_vec
   return info;
 }
 
-std::tuple<double, double, double> latlon_to_xyz(const double lat, const double lon, const double radius) {
+std::vector<double> latlon_to_xyz(const double lat, const double lon, const double radius) {
   // converts latitude, longitude to x y z coords
-  std::tuple<double, double, double> xyz;
+  std::vector<double> xyz (3, 0);
   double x, y, z, dist;
   x = radius * cos(lat) * cos(lon);
   y = radius * cos(lat) * sin(lon);
   z = radius * sin(lat);
   dist = sqrt(x * x + y * y + z * z);
-  xyz = std::make_tuple(x / dist, y / dist, z / dist);
+  xyz[0] = x / dist;
+  xyz[1] = y / dist;
+  xyz[2] = z / dist;
   return xyz;
 }
 
-std::tuple<double, double> xyz_to_latlon(const double x, const double y, const double z) {
+std::vector<double> xyz_to_latlon(const double x, const double y, const double z) {
   // turns cartesian coordinates to spherical coordinates
   double colat, lon;
+  std::vector<double> latlon {0, 0};
   colat = atan2(sqrt(x * x + y * y), z); // colatitude
   lon = atan2(y, x);                   // longitude
-  return std::make_tuple(M_PI / 2.0 - colat, lon);
+  latlon[0] = M_PI / 2.0 - colat;
+  latlon[1] = lon;
+  return latlon;
 }
 
-std::tuple<double, double> xyz_to_latlon(const std::vector<double>& point) {
-  // turns cartesian coordinates to spherical coordinates
-  double colat, lon;
-  colat = atan2(sqrt(point[0] * point[0] + point[1] * point[1]), point[2]); // colatitude
-  lon = atan2(point[1], point[2]);                                          // longitude
-  return std::make_tuple(M_PI / 2.0 - colat, lon);
+std::vector<double> xyz_to_latlon(const std::vector<double>& point) {
+  return xyz_to_latlon(point[0], point[1], point[2]);
 }
 
 std::vector<double> project_to_sphere(double x, double y, double z, const double radius) {
@@ -95,6 +99,10 @@ double gcdist(const double lat1, const double lon1, const double lat2, const dou
                                 cos(lat1) * cos(lat2) * cos(lon2 - lon1))));
 }
 
+double gcdist(const std::vector<double> p1, const std::vector<double> p2, const double radius) {
+  return gcdist(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], radius);
+}
+
 std::vector<double> barycoords(const std::vector<double> &p1,
                                const std::vector<double> &p2,
                                const std::vector<double> &p3,
@@ -113,164 +121,375 @@ std::vector<double> barycoords(const std::vector<double> &p1,
   return coords;
 }
 
-std::vector<double> cube_to_sphere(const double x, const double y, const double z) {
-  // maps a point x, y, z on the unit cube to the surface of the sphere
-  std::vector<double> point {x, y, z};
-  double x2 = x*x;
-  double y2 = y*y;
-  double z2 = z*z;
-  point[0] *= sqrt(1-y2/2-z2/2+y2*z2/3);
-  point[1] *= sqrt(1-x2/2-z2/2+x2*z2/3);
-  point[2] *= sqrt(1-x2/2-y2/2+x2*y2/3);
-  return point;
-}
-
-std::vector<double> cube_to_sphere(const std::vector<double>& cube_point) {
-  double x = cube_point[0];
-  double y = cube_point[1];
-  double z = cube_point[2];
-  return cube_to_sphere(x, y, z);
-}
-
-std::vector<double> sphere_to_cube(const double x, const double y, const double z) {
-  // inverts the previous cube to sphere map
-  std::vector<double> cube_point {0, 0, 0};
+int face_from_xyz(const double x, const double y, const double z) {
   double ax = abs(x);
   double ay = abs(y);
   double az = abs(z);
-  double a2, b2, inner, innersqrt;
-  if ((ax >= ay) and (ax >= az)) {
-    // x coordiante is the largest so one of the x faces
-    a2 = 2*y*y;
-    b2 = 2*z*z;
-    inner = -a2+b2-3;
-    innersqrt = -sqrt(inner*inner - 12*a2);
-    // set y coordinate
-    if (y == 0) {
-      cube_point[1] = 0;
+  if ((ax >= ay) and (ax >=  az)) {
+    if (x >= 0) {
+      return 1;
     } else {
-      cube_point[1] = sqrt(innersqrt + a2 - b2 + 3.0) / sqrt(2);
-    }
-    if (cube_point[1] > 1.0) {
-      cube_point[1] = 1.0;
-    }
-    if (y < 0) {
-      cube_point[1] *= -1;
-    }
-    // set z coordinate
-    if (z == 0) {
-      cube_point[2] = 0;
-    } else {
-      cube_point[2] = sqrt(innersqrt - a2 + b2 + 3.0) / sqrt(2);
-    }
-    if (cube_point[2] > 1.0) {
-      cube_point[2] = 1.0;
-    }
-    if (z < 0) {
-      cube_point[2] *= -1;
-    }
-    // set x coordinate
-    if (x > 0) {
-      cube_point[0] = 1;
-    } else {
-      cube_point[0] = -1;
+      return 3;
     }
   } else if ((ay >= ax) and (ay >= az)) {
-    // y coordinate is the largest so one of the y faces
-    a2 = 2*x*x;
-    b2 = 2*z*z;
-    inner = -a2+b2-3;
-    innersqrt = -sqrt(inner*inner - 12*a2);
-    // set x coordinate
-    if (x == 0) {
-      cube_point[0] = 0;
+    if (y >= 0) {
+      return 2;
     } else {
-      cube_point[0] = sqrt(innersqrt + a2 - b2 + 3.0) / sqrt(2);
-    }
-    if (cube_point[0] > 1.0) {
-      cube_point[0] = 1;
-    }
-    if (x < 0) {
-      cube_point[0] *= -1;
-    }
-    // set z coordinate
-    if (z == 0) {
-      cube_point[2] = 0;
-    } else {
-      cube_point[2] = sqrt(innersqrt - a2 + b2 + 3.0) / sqrt(2);
-    }
-    if (cube_point[2] > 1.0) {
-      cube_point[2] = 1;
-    }
-    if (z < 0) {
-      cube_point[2] *= -1;
-    }
-    // set y coordinate
-    if (y > 0) {
-      cube_point[1] = 1;
-    } else {
-      cube_point[1] = -1;
+      return 4;
     }
   } else {
-    // z coordiante is the largest so one of the z faces
-    a2 = 2*x*x;
-    b2 = 2*y*y;
-    inner = -a2+b2-3;
-    innersqrt = -sqrt(inner*inner - 12*a2);
-    // set x coordinate
-    if (x == 0) {
-      cube_point[0] = 0;
+    if (z >= 0) {
+      return 5;
     } else {
-      cube_point[0] = sqrt(innersqrt + a2 - b2 + 3.0) / sqrt(2);
+      return 6;
     }
-    if (cube_point[0] > 1.0) {
-      cube_point[0] = 1.0;
-    }
-    if (x < 0) {
-      cube_point[0] *= -1;
-    }
-    // set y coordinate
-    if (y == 0) {
-      cube_point[1] = 0;
-    } else {
-      cube_point[1] = sqrt(innersqrt - a2 + b2 + 3.0) / sqrt(2);
-    }
-    if (cube_point[1] > 1.0) {
-      cube_point[1] = 1.0;
-    }
-    if (y < 0) {
-      cube_point[1] *= -1;
-    }
-    // set z coordinate
-    if (z > 0) {
-      cube_point[2] = 1;
-    } else {
-      cube_point[2] = -1;
-    }
-  }
-  return cube_point;
-}
-
-std::vector<double> sphere_to_cube(const std::vector<double>& sphere_point) {
-  return sphere_to_cube(sphere_point[0], sphere_point[1], sphere_point[2]);
-}
-
-std::tuple<double, double> cube_non_one (const double x, const double y, const double z) {
-  if (x == 1) {
-    return std::make_tuple(y, z);
-  } else if (x == -1) {
-    return std::make_tuple(y, z);
-  } else if (y == 1) {
-    return std::make_tuple(x, z);
-  } else if (y == -1) {
-    return std::make_tuple(x, z);
-  } else if (z == 1) {
-    return std::make_tuple(x, y);
-  } else {
-    return std::make_tuple(x, y);
   }
 }
 
-std::tuple<double, double> cube_non_one(const std::vector<double>& cube_point) {
-  return cube_non_one(cube_point[0], cube_point[1], cube_point[2]);
+std::vector<double> xyz_from_xieta_1(const double xi, const double eta) {
+  double X = tan(xi);
+  double Y = tan(eta);
+  std::vector<double> xyz (3, 0);
+  xyz[0] = 1/sqrt(1+X*X+Y*Y);
+  xyz[1] = X*xyz[0];
+  xyz[2] = Y*xyz[0];
+  return xyz;
 }
+
+std::vector<double> xyz_from_xieta_2(const double xi, const double eta) {
+  double X = tan(xi);
+  double Y = tan(eta);
+  std::vector<double> xyz (3, 0);
+  xyz[1] = 1/sqrt(1+X*X+Y*Y);
+  xyz[0] = -X*xyz[1];
+  xyz[2] = Y*xyz[1];
+  return xyz;
+}
+
+std::vector<double> xyz_from_xieta_3(const double xi, const double eta) {
+  double X = tan(xi);
+  double Y = tan(eta);
+  std::vector<double> xyz (3, 0);
+  xyz[0] = -1/sqrt(1+X*X+Y*Y);
+  xyz[1] = X*xyz[0];
+  xyz[2] = -Y*xyz[0];
+  return xyz;
+}
+
+std::vector<double> xyz_from_xieta_4(const double xi, const double eta) {
+  double X = tan(xi);
+  double Y = tan(eta);
+  std::vector<double> xyz (3, 0);
+  xyz[1] = -1/sqrt(1+X*X+Y*Y);
+  xyz[0] = -X*xyz[1];
+  xyz[2] = -Y*xyz[1];
+  return xyz;
+}
+
+std::vector<double> xyz_from_xieta_5(const double xi, const double eta) {
+  double X = tan(xi);
+  double Y = tan(eta);
+  std::vector<double> xyz (3, 0);
+  xyz[2] = 1/sqrt(1+X*X+Y*Y);
+  xyz[0] = -Y*xyz[2];
+  xyz[1] = X*xyz[2];
+  return xyz;
+}
+
+std::vector<double> xyz_from_xieta_6(const double xi, const double eta) {
+  double X = tan(xi);
+  double Y = tan(eta);
+  std::vector<double> xyz (3, 0);
+  xyz[2] = -1/sqrt(1+X*X+Y*Y);
+  xyz[0] = -Y*xyz[2];
+  xyz[1] = -X*xyz[2];
+  return xyz;
+}
+
+std::vector<double> xyz_from_xieta(const double xi, const double eta, const int face) {
+  std::vector<double> xyz;
+  if (face == 1) {
+    xyz = xyz_from_xieta_1(xi, eta);
+  } else if (face == 2) {
+    xyz = xyz_from_xieta_2(xi, eta);
+  } else if (face == 3) {
+    xyz =  xyz_from_xieta_3(xi, eta);
+  } else if (face == 4) {
+    xyz = xyz_from_xieta_4(xi, eta);
+  } else if (face == 5) {
+    xyz = xyz_from_xieta_5(xi, eta);
+  } else if (face == 6) {
+    xyz = xyz_from_xieta_6(xi, eta);
+  } else {
+    throw std::runtime_error("face is not 1 to 6, line 198");
+  }
+  return xyz;
+}
+
+std::vector<double> xieta_from_xyz_1(const double x, const double y, const double z) {
+  std::vector<double> xieta (2, 0);
+  xieta[0] = atan(y/x);
+  xieta[1] = atan(z/x);
+  return xieta;
+}
+
+std::vector<double> xieta_from_xyz_2(const double x, const double y, const double z) {
+  std::vector<double> xieta (2, 0);
+  xieta[0] = atan(-x/y);
+  xieta[1] = atan(z/y);
+  return xieta;
+}
+
+std::vector<double> xieta_from_xyz_3(const double x, const double y, const double z) {
+  std::vector<double> xieta (2, 0);
+  xieta[0] = atan(y/x);
+  xieta[1] = atan(-z/x);
+  return xieta;
+}
+
+std::vector<double> xieta_from_xyz_4(const double x, const double y, const double z) {
+  std::vector<double> xieta (2, 0);
+  xieta[0] = atan(-x/y);
+  xieta[1] = atan(-z/y);
+  return xieta;
+}
+
+std::vector<double> xieta_from_xyz_5(const double x, const double y, const double z) {
+  std::vector<double> xieta (2, 0);
+  xieta[0] = atan(y/z);
+  xieta[1] = atan(-x/z);
+  return xieta;
+}
+
+std::vector<double> xieta_from_xyz_6(const double x, const double y, const double z) {
+  std::vector<double> xieta (2, 0);
+  xieta[0] = atan(-y/z);
+  xieta[1] = atan(-x/z);
+  return xieta;
+}
+
+std::vector<double> xieta_from_xyz(const double x, const double y, const double z) {
+  double ax = abs(x);
+  double ay = abs(y);
+  double az = abs(z);
+
+  if ((ax >= ay) and (ax >= az)) {
+    if (x >= 0) {
+      return xieta_from_xyz_1(x, y, z);
+    } else {
+      return xieta_from_xyz_3(x, y, z);
+    }
+  } else if ((ay >= ax) and (ay >= az)) {
+    if (y >= 0) {
+      return xieta_from_xyz_2(x, y, z);
+    } else {
+      return xieta_from_xyz_4(x, y, z);
+    }
+  } else {
+    if (z >= 0) {
+      return xieta_from_xyz_5(x, y, z);
+    } else {
+      return xieta_from_xyz_6(x, y, z);
+    }
+  }
+}
+
+std::vector<double> xieta_from_xyz(const double x, const double y, const double z, const int face) {
+  if (face == 1) {
+    return xieta_from_xyz_1(x, y, z);
+  } else if (face == 2) {
+    return xieta_from_xyz_2(x, y, z);
+  } else if (face == 3) {
+    return xieta_from_xyz_3(x, y, z);
+  } else if (face == 4) {
+    return xieta_from_xyz_4(x, y, z);
+  } else if (face == 5) {
+    return xieta_from_xyz_5(x, y, z);
+  } else if (face == 6) {
+    return xieta_from_xyz_6(x, y, z);
+  } else {
+    throw std::runtime_error("Face not between 1 and 6, line 287");
+  }
+}
+
+// std::vector<double> cube_to_sphere(const double x, const double y, const double z) {
+//   // maps a point x, y, z on the unit cube to the surface of the sphere
+//   std::vector<double> point {x, y, z};
+//   double x2 = x*x;
+//   double y2 = y*y;
+//   double z2 = z*z;
+//   point[0] *= sqrt(1-y2/2-z2/2+y2*z2/3);
+//   point[1] *= sqrt(1-x2/2-z2/2+x2*z2/3);
+//   point[2] *= sqrt(1-x2/2-y2/2+x2*y2/3);
+//   return point;
+// }
+//
+// std::vector<double> cube_to_sphere(const std::vector<double>& cube_point) {
+//   double x = cube_point[0];
+//   double y = cube_point[1];
+//   double z = cube_point[2];
+//   return cube_to_sphere(x, y, z);
+// }
+//
+// std::vector<double> sphere_to_cube(const double x, const double y, const double z) {
+//   // inverts the previous cube to sphere map
+//   std::vector<double> cube_point {0, 0, 0};
+//   double ax = abs(x);
+//   double ay = abs(y);
+//   double az = abs(z);
+//   double a2, b2, inner, innersqrt;
+//   if ((ax >= ay) and (ax >= az)) {
+//     // x coordiante is the largest so one of the x faces
+//     a2 = 2*y*y;
+//     b2 = 2*z*z;
+//     inner = -a2+b2-3;
+//     innersqrt = -sqrt(inner*inner - 12*a2);
+//     // set y coordinate
+//     if (y == 0) {
+//       cube_point[1] = 0;
+//     } else {
+//       cube_point[1] = std::copysign(std::min(1.0, sqrt(innersqrt + a2 - b2 + 3.0) / sqrt(2)), y);
+//     }
+//     // set z coordinate
+//     if (z == 0) {
+//       cube_point[2] = 0;
+//     } else {
+//       cube_point[2] = std::copysign(std::min(1.0, sqrt(innersqrt - a2 + b2 + 3.0) / sqrt(2)), z);
+//     }
+//     // set x coordinate
+//     cube_point[0] = std::copysign(1, x);
+//   } else if ((ay >= ax) and (ay >= az)) {
+//     // y coordinate is the largest so one of the y faces
+//     a2 = 2*x*x;
+//     b2 = 2*z*z;
+//     inner = -a2+b2-3;
+//     innersqrt = -sqrt(inner*inner - 12*a2);
+//     // set x coordinate
+//     if (x == 0) {
+//       cube_point[0] = 0;
+//     } else {
+//       cube_point[0] = std::copysign(std::min(1.0, sqrt(innersqrt + a2 - b2 + 3.0) / sqrt(2)), x);
+//     }
+//     // set z coordinate
+//     if (z == 0) {
+//       cube_point[2] = 0;
+//     } else {
+//       cube_point[2] = std::copysign(std::min(1.0, sqrt(innersqrt - a2 + b2 + 3.0) / sqrt(2)), z);
+//     }
+//     // set y coordinate
+//     cube_point[1] = std::copysign(1, y);
+//   } else {
+//     // z coordiante is the largest so one of the z faces
+//     a2 = 2*x*x;
+//     b2 = 2*y*y;
+//     inner = -a2+b2-3;
+//     innersqrt = -sqrt(inner*inner - 12*a2);
+//     // set x coordinate
+//     if (x == 0) {
+//       cube_point[0] = 0;
+//     } else {
+//       cube_point[0] = std::copysign(std::min(1.0, sqrt(innersqrt + a2 - b2 + 3.0) / sqrt(2)), x);
+//     }
+//     // set y coordinate
+//     if (y == 0) {
+//       cube_point[1] = 0;
+//     } else {
+//       cube_point[1] = std::copysign(std::min(1.0, sqrt(innersqrt - a2 + b2 + 3.0) / sqrt(2)), y);
+//     }
+//     // set z coordinate
+//     cube_point[2] = std::copysign(1, z);
+//   }
+//   return cube_point;
+// }
+//
+// std::vector<double> sphere_to_cube(const std::vector<double>& sphere_point) {
+//   return sphere_to_cube(sphere_point[0], sphere_point[1], sphere_point[2]);
+// }
+//
+// std::vector<double> cube_non_one (const double x, const double y, const double z) {
+//   std::vector<double> out {0, 0};
+//   if (x == 1) {
+//     out[0] = y;
+//     out[1] = z;
+//   } else if (x == -1) {
+//     out[0] = y;
+//     out[1] = z;
+//   } else if (y == 1) {
+//     out[0] = x;
+//     out[1] = z;
+//   } else if (y == -1) {
+//     out[0] = x;
+//     out[1] = z;
+//   } else if (z == 1) {
+//     out[0] = x;
+//     out[1] = y;
+//   } else {
+//     out[0] = x;
+//     out[1] = y;
+//   }
+//   return out;
+// }
+//
+// std::vector<double> cube_non_one(const std::vector<double>& cube_point) {
+//   return cube_non_one(cube_point[0], cube_point[1], cube_point[2]);
+// }
+//
+// bool check_in_cube_square(const double x, const double y, const double z, const CubePanel& cube_panel) {
+//   // check if point is in cube panel
+//   if (x == 1) {
+//     if ((cube_panel.vertex_1[0] == 1) and (cube_panel.vertex_2[0] == 1) and (cube_panel.vertex_3[0] == 1) and (cube_panel.vertex_4[0] == 1)) {
+//       if ((y > cube_panel.min_side_1) and (y < cube_panel.max_side_1) and (z > cube_panel.min_side_2) and (z < cube_panel.min_side_2)) {
+//         return true;
+//       }
+//     }
+//   } else if (x == -1) {
+//     if ((cube_panel.vertex_1[0] == -1) and (cube_panel.vertex_2[0] == -1) and (cube_panel.vertex_3[0] == -1) and (cube_panel.vertex_4[0] == -1)) {
+//       if ((y > cube_panel.min_side_1) and (y < cube_panel.max_side_1) and (z > cube_panel.min_side_2) and (z < cube_panel.min_side_2)) {
+//         return true;
+//       }
+//     }
+//   } else if (y == 1) {
+//     if ((cube_panel.vertex_1[1] == 1) and (cube_panel.vertex_2[1] == 1) and (cube_panel.vertex_3[1] == 1) and (cube_panel.vertex_4[1] == 1)) {
+//       if ((x > cube_panel.min_side_1) and (x < cube_panel.max_side_1) and (z > cube_panel.min_side_2) and (z < cube_panel.min_side_2)) {
+//         return true;
+//       }
+//     }
+//   } else if (y == -1) {
+//     if ((cube_panel.vertex_1[1] == -1) and (cube_panel.vertex_2[1] == -1) and (cube_panel.vertex_3[1] == -1) and (cube_panel.vertex_4[1] == -1)) {
+//       if ((x > cube_panel.min_side_1) and (x < cube_panel.max_side_1) and (z > cube_panel.min_side_2) and (z < cube_panel.min_side_2)) {
+//         return true;
+//       }
+//     }
+//   } else if (z == 1) {
+//     if ((cube_panel.vertex_1[2] == 1) and (cube_panel.vertex_2[2] == 1) and (cube_panel.vertex_3[2] == 1) and (cube_panel.vertex_4[2] == 1)) {
+//       if ((x > cube_panel.min_side_1) and (x < cube_panel.max_side_1) and (y > cube_panel.min_side_2) and (y < cube_panel.min_side_2)) {
+//         return true;
+//       }
+//     }
+//   } else if (z == -1) {
+//     if ((cube_panel.vertex_1[2] == -1) and (cube_panel.vertex_2[2] == -1) and (cube_panel.vertex_3[2] == -1) and (cube_panel.vertex_4[2] == -1)) {
+//       if ((x > cube_panel.min_side_1) and (x < cube_panel.max_side_1) and (y > cube_panel.min_side_2) and (y < cube_panel.min_side_2)) {
+//         return true;
+//       }
+//     }
+//   } else {
+//     // throw std::runtime_error("Point is not on cube, check_in_cube_square, general_utils, line 309 ")
+//     return false;
+//   }
+//   return false;
+// }
+//
+// bool check_in_cube_square(const std::vector<double> point, const CubePanel& cube_panel) {
+//   // check if point is in cube panel
+//   return check_in_cube_square(point[0], point[1], point[2], cube_panel);
+// }
+//
+// bool check_in_cube_square(const double x, const double y, const double z, const double min_side_1, const double max_side_1, const double min_side_2, const double max_side_2) {
+//   std::vector<double> non_ones = cube_non_one(x, y, z);
+//   if ((non_ones[0] > min_side_1) and (non_ones[0] < max_side_1)) {
+//     if ((non_ones[1] > min_side_2) and (non_ones[1] < max_side_2)) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }

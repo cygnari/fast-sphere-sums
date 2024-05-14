@@ -18,7 +18,7 @@ struct RunConfig {
   int sph_harm_comps; // number of spherical harmonic components to use
 
   // fast sum info
-  int fast_sum_cluster_thresh; // threshold for a triangle being a cluster
+  int fast_sum_cluster_thresh; // threshold for a panel being a cluster
   double fast_sum_theta;       // well separated threshold
   bool fast_sum_rotate = true; // whether or not to rotate the fast sum grid
   double fast_sum_rotate_alph = 0.01; // 3 rotation coefficients
@@ -45,16 +45,16 @@ struct CubePanel {
   int child_panel_2 = -1;
   int child_panel_3 = -1;
   int child_panel_4 = -1;
-  std::vector<double> vertex_1 {0, 0, 0};
-  std::vector<double> vertex_2 {0, 0, 0};
-  std::vector<double> vertex_3 {0, 0, 0};
-  std::vector<double> vertex_4 {0, 0, 0};
-  double min_side_1;
-  double max_side_1;
-  double min_side_2;
-  double max_side_2;
+  int face; // face 1: x = 1, face 2: y = 1, face 3: x = -1, face 4: y = -1, face 5: z = 1, face 6: z = -1
+  double min_xi;
+  double mid_xi;
+  double max_xi;
+  double min_eta;
+  double mid_eta;
+  double max_eta;
   double radius;
   int point_count = 0; // number of points in this panel
+  std::vector<int> points_inside;
 
 };
 
