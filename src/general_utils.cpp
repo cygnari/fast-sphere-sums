@@ -5,8 +5,6 @@
 #include <cassert>
 #include <iostream>
 
-#include "structs.hpp"
-
 extern "C" { // lapack
 extern int dgesv_(int *, int *, double *, int *, int *, double *, int *, int *);
 extern int dgelsd_(int *, int *, int *, double *, int *, double *, int *, double *, double *, int *, double *, int *, int *, int *);
@@ -48,6 +46,21 @@ int linear_solve(const std::vector<double> &a_matrix, std::vector<double> &b_vec
     dgelsd_(&size, &size, &nrhs, &*interp_mat_copy.begin(), &size, &*b_vec.begin(), &size, &*sing_vals.begin(), &rcond, &rank, &*work.begin(), &lwork, &*iwork.begin(), &info);
   }
   return info;
+}
+
+void project_to_sphere(std::vector<double> &p1, const double radius) {
+  // projects a point to the surface of a sphere of radius, modifies p1
+  double norm = sqrt(p1[0]*p1[0] + p1[1]*p1[1] + p1[2]*p1[2]);
+  for (int i = 0; i < p1.size(); i++) p1[i] *= radius / norm;
+}
+
+std::vector<double> project_to_sphere_2(const std::vector<double> p1, const double radius) {
+  // projects a point to the surface of a sphere of radius,
+  // returns the new coordinates
+  double norm = sqrt(p1[0]*p1[0] + p1[1]*p1[1] + p1[2]*p1[2]);
+  std::vector<double> newcords(p1.size());
+  for (int i = 0; i < p1.size(); i++) newcords[i] = radius * p1[i] / norm;
+  return newcords;
 }
 
 std::vector<double> latlon_to_xyz(const double lat, const double lon, const double radius) {
@@ -103,10 +116,8 @@ double gcdist(const std::vector<double> p1, const std::vector<double> p2, const 
   return gcdist(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], radius);
 }
 
-std::vector<double> barycoords(const std::vector<double> &p1,
-                               const std::vector<double> &p2,
-                               const std::vector<double> &p3,
-                               const double x, const double y, const double z) {
+std::vector<double> barycoords(const std::vector<double> &p1, const std::vector<double> &p2,
+                               const std::vector<double> &p3, const double x, const double y, const double z) {
   // finds triangle barycentric coordinates of point p
   assert(p1.size() == 3);
   assert(p2.size() == 3);
@@ -119,6 +130,26 @@ std::vector<double> barycoords(const std::vector<double> &p1,
     throw std::runtime_error("Error in barycentric coordinate computation, line 94");
   }
   return coords;
+}
+
+double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> &p2,
+                       const std::vector<double> &p3, const double radius) {
+  // finds the area of a spherical triangle
+  std::vector<double> p1n, p2n, p3n;
+  double a, b, c, s, z, area;
+  p1n = p1; // don't modify p1, modify p1n
+  p2n = p2;
+  p3n = p3;
+  p2n[0] -= p3[0], p2n[1] -= p3[1], p2n[2] -= p3[2];
+  p3n[0] -= p1[0], p3n[1] -= p1[1], p3n[2] -= p1[2];
+  p1n[0] -= p2[0], p1n[1] -= p2[1], p1n[2] -= p2[2];
+  a = acos(1 - 0.5 * (p2n[0]*p2n[0]+p2n[1]*p2n[1]+p2n[2]*p2n[2]));
+  b = acos(1 - 0.5 * (p3n[0]*p3n[0]+p3n[1]*p3n[1]+p3n[2]*p3n[2]));
+  c = acos(1 - 0.5 * (p1n[0]*p1n[0]+p1n[1]*p1n[1]+p1n[2]*p1n[2]));
+  s = (a + b + c) / 2;
+  z = tan(s / 2) * tan((s - a) / 2) * tan((s - b) / 2) * tan((s - c) / 2);
+  area = 4 * radius * radius * atan(sqrt(z));
+  return area;
 }
 
 int face_from_xyz(const double x, const double y, const double z) {

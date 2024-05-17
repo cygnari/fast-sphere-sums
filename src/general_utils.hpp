@@ -2,9 +2,12 @@
 #define H_GENERAL_UTIL_H
 
 #include <vector>
-#include "structs.hpp"
 
 int linear_solve(const std::vector<double> &a_matrix, std::vector<double> &b_vec, int size, int nrhs, const int solver);
+
+void project_to_sphere(std::vector<double> &p1, const double radius);
+
+std::vector<double> project_to_sphere_2(const std::vector<double> p1, const double radius);
 
 std::vector<double> latlon_to_xyz(const double lat, const double lon, const double radius);
 
@@ -20,10 +23,10 @@ double gcdist(const double lat1, const double lon1, const double lat2, const dou
 
 double gcdist(const std::vector<double> p1, const std::vector<double> p2, const double radius);
 
-std::vector<double> barycoords(const std::vector<double> &p1,
-                               const std::vector<double> &p2,
-                               const std::vector<double> &p3,
-                               const double x, const double y, const double z);
+std::vector<double> barycoords(const std::vector<double> &p1, const std::vector<double> &p2,
+                               const std::vector<double> &p3, const double x, const double y, const double z);
+
+double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> &p2, const std::vector<double> &p3, const double radius);
 
 int face_from_xyz(const double x, const double y, const double z);
 
