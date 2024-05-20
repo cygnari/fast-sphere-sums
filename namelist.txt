@@ -15,6 +15,6 @@ gamm=4
 sph_harm_comps=20
 grid=icos_grid
 tree=cube
-initial_condition=SH
+initial_condition=SH43
 icp1=4
 icp2=3

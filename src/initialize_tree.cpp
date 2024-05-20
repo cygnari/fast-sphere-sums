@@ -248,7 +248,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
   // iterate through panels, refine where needed
   for (int i = 0; i < cube_panels.size(); i++) {
     // check if panel needs to be divided
-    std::cout << i << "," << cube_panels[i].point_count << "," << cube_panels[i].face << std::endl;
+    // std::cout << i << "," << cube_panels[i].point_count << "," << cube_panels[i].face << std::endl;
     if ((cube_panels[i].point_count >= run_information.fast_sum_cluster_thresh) and (cube_panels[i].is_leaf)) {
       // refine the panel
       cube_panels[i].is_leaf = false;

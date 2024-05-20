@@ -5,6 +5,7 @@
 
 #include "fast-sphere-sums-config.h"
 #include "general_utils.hpp"
+#include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
 #include "io_utils.hpp"
 #include "mpi_utils.hpp"
@@ -25,6 +26,7 @@ int main(int argc, char **argv) {
   std::vector<double> ycos (run_information.point_count, 0);
   std::vector<double> zcos (run_information.point_count, 0);
   std::vector<double> area (run_information.point_count, 0);
+  std::vector<double> potential (run_information.point_count, 0);
 
   std::string data_pre = DATA_DIR + std::to_string(run_information.point_count) + "_" + run_information.grid + "_";
 
@@ -37,9 +39,14 @@ int main(int argc, char **argv) {
     rotate_points(xcos, ycos, zcos, run_information.alph, run_information.beta, run_information.gamm);
   }
 
+  initialize_condition(run_information, xcos, ycos, zcos, potential);
+
   std::vector<CubePanel> cube_panels;
   initialize_cube_tree(run_information, cube_panels, xcos, ycos, zcos);
-  // std::cout << cube_panels.size() << std::endl;
+
+  std::vector<InteractPair> interactions;
+  dual_tree_traversal_cube(run_information, interactions, cube_panels);
+  // std::cout << interactions.size() << std::endl;
 
 
   MPI_Finalize();

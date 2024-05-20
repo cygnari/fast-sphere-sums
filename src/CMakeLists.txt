@@ -1,5 +1,6 @@
 add_library(FastSphereSums
     general_utils.cpp
+    initial_conditions.cpp
     initialize_tree.cpp
     interp_utils.cpp
     io_utils.cpp
@@ -14,6 +15,7 @@ target_include_directories(FastSphereSums PUBLIC
 install(FILES
     # all FastSphereSums header/include files go here
     ${CMAKE_BINARY_DIR}/fast-sphere-sums-config.h
+    initial_conditions.hpp
     initialize_tree.hpp
     interp_utils.hpp
     io_utils.hpp

@@ -26,7 +26,7 @@ struct RunConfig {
   std::string initial_condition; // initial vorticity distribution
   int init_cond_param1;              // parameter for initial condition
   int init_cond_param2;           // parameter for initial condition
-  // for SH, icp1 = l, icp2 = m
+  // ICs: SH43
 
   // fast sum info
   int fast_sum_cluster_thresh; // threshold for a panel being a cluster
