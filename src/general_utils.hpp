@@ -5,6 +5,12 @@
 
 int linear_solve(const std::vector<double> &a_matrix, std::vector<double> &b_vec, int size, int nrhs, const int solver);
 
+std::vector<double> mat_vec_mult_3_3_3(const std::vector<std::vector<double>> &Amat,
+                const double x, const double y, const double z);
+
+void rotate_points(std::vector<double>& xcos, std::vector<double>& ycos, std::vector<double>& zcos,
+                    const double alph, const double beta, const double gamm);
+
 void project_to_sphere(std::vector<double> &p1, const double radius);
 
 std::vector<double> project_to_sphere_2(const std::vector<double> p1, const double radius);

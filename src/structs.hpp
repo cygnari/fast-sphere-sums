@@ -18,14 +18,19 @@ struct RunConfig {
   int time; // time 0, 1, 2, or 3
   int sph_harm_comps; // number of spherical harmonic components to use
   std::string grid; // "mpas_ocean_grid" or "icos_grid"
+  bool rotate = true; // whether or not to rotate the points
+  double alph = 0.01; // 3 rotation coefficients
+  double beta = 0.01;
+  double gamm = 0.01;
+
+  std::string initial_condition; // initial vorticity distribution
+  int init_cond_param1;              // parameter for initial condition
+  int init_cond_param2;           // parameter for initial condition
+  // for SH, icp1 = l, icp2 = m
 
   // fast sum info
   int fast_sum_cluster_thresh; // threshold for a panel being a cluster
   double fast_sum_theta;       // well separated threshold
-  bool fast_sum_rotate = true; // whether or not to rotate the fast sum grid
-  double fast_sum_rotate_alph = 0.01; // 3 rotation coefficients
-  double fast_sum_rotate_beta = 0.01;
-  double fast_sum_rotate_gamm = 0.01;
   bool use_icos = false;
 
   // mpi info

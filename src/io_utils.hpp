@@ -13,9 +13,9 @@ std::string create_config(const RunConfig &run_information, const std::string ex
 //
 // void read_latlon(const RunConfig &run_information, std::vector<double>& latvals, std::vector<double>& lonvals, std::vector<double>& areas);
 
-void read_data_field(const RunConfig &run_information, std::vector<double>& data, std::string file_name);
+void read_data_field(const int point_count, std::vector<double>& data, const std::string file_name);
 
-void load_llns(int sph_harm_comps, std::vector<double>& llns);
+void load_llns(const int sph_harm_comps, std::vector<double>& llns);
 
 void write_state(const std::vector<double> &data, const std::string path);
 

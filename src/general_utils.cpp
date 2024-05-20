@@ -48,6 +48,37 @@ int linear_solve(const std::vector<double> &a_matrix, std::vector<double> &b_vec
   return info;
 }
 
+std::vector<double> mat_vec_mult_3_3_3(const std::vector<std::vector<double>> &Amat,
+                                        const double x, const double y, const double z) {
+  std::vector<double> vec (3, 0);
+  for (int i = 0; i < 3; i++) {
+    vec[i] = Amat[i][0] * x + Amat[i][1] * y + Amat[i][2] * z;
+  }
+  return vec;
+}
+
+void rotate_points(std::vector<double>& xcos, std::vector<double>& ycos, std::vector<double>& zcos,
+                    const double alph, const double beta, const double gamm) {
+  // rotates points
+  std::vector<std::vector<double>> rot_mat(3, std::vector<double>(3, 0));
+  rot_mat[0][0] = cos(beta) * cos(gamm);
+  rot_mat[0][1] = sin(alph) * sin(beta) * cos(gamm) - cos(alph) * sin(gamm);
+  rot_mat[0][2] = cos(alph) * sin(beta) * cos(gamm) + sin(alph) * sin(gamm);
+  rot_mat[1][0] = cos(beta) * sin(gamm);
+  rot_mat[1][1] = sin(alph) * sin(beta) * sin(gamm) + cos(alph) * cos(gamm);
+  rot_mat[1][2] = cos(alph) * sin(beta) * sin(gamm) - sin(alph) * cos(gamm);
+  rot_mat[2][0] = -sin(beta);
+  rot_mat[2][1] = sin(alph) * cos(beta);
+  rot_mat[2][2] = cos(alph) * cos(beta);
+  std::vector<double> rotated;
+  for (int i = 0; i < xcos.size(); i++) {
+    rotated = mat_vec_mult_3_3_3(rot_mat, xcos[i], ycos[i], zcos[i]);
+    xcos[i] = rotated[0];
+    ycos[i] = rotated[1];
+    zcos[i] = rotated[2];
+  }
+}
+
 void project_to_sphere(std::vector<double> &p1, const double radius) {
   // projects a point to the surface of a sphere of radius, modifies p1
   double norm = sqrt(p1[0]*p1[0] + p1[1]*p1[1] + p1[2]*p1[2]);
@@ -156,7 +187,7 @@ int face_from_xyz(const double x, const double y, const double z) {
   double ax = abs(x);
   double ay = abs(y);
   double az = abs(z);
-  if ((ax >= ay) and (ax >=  az)) {
+  if ((ax >= ay) and (ax >= az)) {
     if (x >= 0) {
       return 1;
     } else {
@@ -339,7 +370,7 @@ std::vector<double> xieta_from_xyz(const double x, const double y, const double 
   } else if (face == 6) {
     return xieta_from_xyz_6(x, y, z);
   } else {
-    throw std::runtime_error("Face not between 1 and 6, line 287");
+    throw std::runtime_error("Face not between 1 and 6, line 342");
   }
 }
 

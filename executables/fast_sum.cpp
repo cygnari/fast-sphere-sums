@@ -21,16 +21,25 @@ int main(int argc, char **argv) {
   const std::string namelist_file = std::string(NAMELIST_DIR) + std::string("namelist.txt");
   read_run_config(namelist_file, run_information);
 
-  // // std::
-  // std::vector<double> xyz;
-  // std::vector<double> xieta;
-  // for (int i = 1; i < 7; i++) {
-  //   xyz = xyz_from_xieta(0, 0, i);
-  //   std::cout << "face " << i << " xyz " << xyz[0] << "," << xyz[1] << "," << xyz[2] << std::endl;
-  //   xieta = xieta_from_xyz(xyz[0], xyz[1], xyz[2]);
-  //   // xieta = xieta_from_xyz(xyz[0], xyz[1], xyz[2], i);
-  //   std::cout << xieta[0] << "," << xieta[1] << std::endl;
-  // }
+  std::vector<double> xcos (run_information.point_count, 0);
+  std::vector<double> ycos (run_information.point_count, 0);
+  std::vector<double> zcos (run_information.point_count, 0);
+  std::vector<double> area (run_information.point_count, 0);
+
+  std::string data_pre = DATA_DIR + std::to_string(run_information.point_count) + "_" + run_information.grid + "_";
+
+  read_data_field(run_information.point_count, xcos, data_pre + "x.csv");
+  read_data_field(run_information.point_count, ycos, data_pre + "y.csv");
+  read_data_field(run_information.point_count, zcos, data_pre + "z.csv");
+  read_data_field(run_information.point_count, area, data_pre + "areas.csv");
+
+  if (run_information.rotate) {
+    rotate_points(xcos, ycos, zcos, run_information.alph, run_information.beta, run_information.gamm);
+  }
+
+  std::vector<CubePanel> cube_panels;
+  initialize_cube_tree(run_information, cube_panels, xcos, ycos, zcos);
+  // std::cout << cube_panels.size() << std::endl;
 
 
   MPI_Finalize();

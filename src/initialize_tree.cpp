@@ -235,6 +235,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
     yval = y[i];
     zval = z[i];
     face = face_from_xyz(xval, yval, zval);
+    // std::cout << face << std::endl;
     cube_panels[face-1].point_count += 1;
     cube_panels[face-1].points_inside.push_back(i);
   }
@@ -247,6 +248,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
   // iterate through panels, refine where needed
   for (int i = 0; i < cube_panels.size(); i++) {
     // check if panel needs to be divided
+    std::cout << i << "," << cube_panels[i].point_count << "," << cube_panels[i].face << std::endl;
     if ((cube_panels[i].point_count >= run_information.fast_sum_cluster_thresh) and (cube_panels[i].is_leaf)) {
       // refine the panel
       cube_panels[i].is_leaf = false;
@@ -287,11 +289,16 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
 
       // assign points in parent panel to child panels
       points_to_assign = cube_panels[i].points_inside;
-      for (int i = 0; i < points_to_assign.size(); i++) {
-        xval = x[points_to_assign[i]];
-        yval = y[points_to_assign[i]];
-        zval = z[points_to_assign[i]];
+      for (int j = 0; j < points_to_assign.size(); j++) {
+        xval = x[points_to_assign[j]];
+        yval = y[points_to_assign[j]];
+        zval = z[points_to_assign[j]];
         xieta = xieta_from_xyz(xval, yval, zval, cube_panels[i].face);
+        xi = xieta[0];
+        eta = xieta[1];
+        min_xi = cube_panels[i].min_xi, max_xi = cube_panels[i].max_xi, min_eta = cube_panels[i].min_eta, max_eta = cube_panels[i].max_eta;
+        mid_xi = (min_xi + max_xi) * 0.5;
+        mid_eta = (min_eta + max_eta) * 0.5;
         if (xi < mid_xi) {
           if (eta < mid_eta) {
             which_panel = 2;
@@ -306,7 +313,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
           }
         }
         cube_panels[start+which_panel].point_count += 1;
-        cube_panels[start+which_panel].points_inside.push_back(points_to_assign[i]);
+        cube_panels[start+which_panel].points_inside.push_back(points_to_assign[j]);
       }
       point_count = cube_panels[start].point_count + cube_panels[start+1].point_count + cube_panels[start+2].point_count + cube_panels[start+3].point_count;
       if (point_count != cube_panels[i].point_count) {
