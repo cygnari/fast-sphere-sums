@@ -16,10 +16,48 @@ void sh_43(const std::vector<double>& xcos, const std::vector<double>& ycos, con
   }
 }
 
+void sh_10(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  double constant = sqrt(3.0/(4.0*M_PI));
+  for (int i = 0; i < xcos.size(); i++) {
+    potential[i] = constant * zcos[i];
+  }
+}
+
+void one(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  for (int i = 0; i < potential.size(); i++) {
+    potential[i] = 1.0;
+  }
+}
+
+void z_co(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  for (int i = 0; i < potential.size(); i++) {
+    potential[i] = zcos[i];
+  }
+}
+
 void initialize_condition(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
   // initial condition
   if (run_information.initial_condition == "SH43") {
     // 4 3 spherical harmonic
     sh_43(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "SH10") {
+    sh_10(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "One") {
+    one(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "Z") {
+    z_co(xcos, ycos, zcos, potential);
+  }
+}
+
+void balance_conditions(std::vector<double>& potential, const std::vector<double>& area) {
+  // insure that integral of potential is 0
+  double int_pot = 0;
+  for (int i = 0; i < potential.size(); i++) {
+    int_pot += potential[i] * area[i];
+  }
+  if (abs(int_pot) > 1e-15) {
+    for (int i = 0; i < potential.size(); i++) {
+      potential[i] -= int_pot / (4 * M_PI);
+    }
   }
 }

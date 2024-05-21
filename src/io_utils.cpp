@@ -52,6 +52,10 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
       run_information.init_cond_param1 = stoi(word2);
     } else if (word1 == "icp2") {
       run_information.init_cond_param2 = stoi(word2);
+    } else if (word1 == "balance_condition") {
+      if (stoi(word2) == 0) {
+        run_information.balance_condition = false;
+      }
     } else if (word1 == "time") {
       run_information.time = stoi(word2);
     } else if (word1 == "degree") {
@@ -93,11 +97,16 @@ std::string create_config(const RunConfig &run_information, const std::string ex
   std::stringstream ss1, ss2, ss3;
   int precision;
   std::string output_filename = std::to_string(run_information.time) + "_" +
-      std::to_string(run_information.point_count) + "_" + std::to_string(run_information.sph_harm_comps) + "_";
+      std::to_string(run_information.point_count) + "_";
   if (run_information.use_fast) {
     output_filename +=
         "fast_" + std::to_string(run_information.fast_sum_cluster_thresh) + "_" +
         std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree);
+    if (run_information.use_icos) {
+      output_filename += "icos_";
+    } else {
+      output_filename += "cube_";
+    }
   } else
     output_filename += "direct";
   output_filename += extra;
@@ -140,7 +149,7 @@ void write_state(const std::vector<double> &data, const std::string path) {
   // write sal potential
   std::ofstream write_out(path, std::ofstream::out | std::ofstream::trunc);
   for (int i = 0; i < data.size(); i++) { // write out state
-    write_out << data[i] << "\n";
+    write_out << std::setprecision(16) << data[i] << "\n";
   }
   write_out.close();
 }
