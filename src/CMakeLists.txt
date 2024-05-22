@@ -1,5 +1,6 @@
 add_library(FastSphereSums
     direct_sum_funcs.cpp
+    fast_sum_funcs.cpp
     general_utils.cpp
     initial_conditions.cpp
     initialize_tree.cpp
@@ -17,6 +18,7 @@ install(FILES
     # all FastSphereSums header/include files go here
     ${CMAKE_BINARY_DIR}/fast-sphere-sums-config.h
     direct_sum_funcs.hpp
+    fast_sum_funcs.hpp
     initial_conditions.hpp
     initialize_tree.hpp
     interp_utils.hpp

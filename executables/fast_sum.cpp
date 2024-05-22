@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "fast-sphere-sums-config.h"
+#include "fast_sum_funcs.hpp"
 #include "general_utils.hpp"
 #include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
@@ -40,6 +41,9 @@ int main(int argc, char **argv) {
   }
 
   initialize_condition(run_information, xcos, ycos, zcos, potential);
+  if (run_information.balance_condition) {
+    balance_conditions(potential, area);
+  }
 
   std::vector<CubePanel> cube_panels;
   initialize_cube_tree(run_information, cube_panels, xcos, ycos, zcos);

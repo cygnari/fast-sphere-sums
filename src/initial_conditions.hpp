@@ -4,12 +4,6 @@
 #include <vector>
 #include "structs.hpp"
 
-void sh_43(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential);
-
-void sh_10(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential);
-
-void one(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential);
-
 void initialize_condition(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential);
 
 void balance_conditions(std::vector<double>& potential, const std::vector<double>& area);

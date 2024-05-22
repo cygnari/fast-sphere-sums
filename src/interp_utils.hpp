@@ -17,4 +17,8 @@ double interp_eval_sbb(const std::vector<double> &alphas, const double s, const 
 
 double bli_coeff(const int j, const int degree);
 
+std::vector<std::vector<double>> interp_vals_bli(const double xi, const double eta, const double min_xi, const double max_xi, const double min_eta, const double max_eta, const int degree);
+
+std::vector<double> bli_interp_points_shift(const double min_x, const double max_x, const int degree);
+
 #endif

@@ -121,3 +121,84 @@ double bli_coeff(const int j, const int degree) {
     return pow(-1, j);
   }
 }
+
+std::vector<std::vector<double>> interp_vals_bli(const double xi, const double eta, const double min_xi, const double max_xi, const double min_eta, const double max_eta, const int degree) {
+  // returns matrix of BLI basis values
+  std::vector<double> cheb_points (degree+1, 0), bli_weights (degree+1, 0);
+  std::vector<std::vector<double>> func_vals (degree+1, std::vector<double> (degree+1, 0));
+  for (int i = 0; i < degree+1; i++) {
+    cheb_points[i] = cos(M_PI / degree * i);
+    bli_weights[i] = bli_coeff(i, degree);
+  }
+  // translate weights
+  std::vector<double> cheb_points_xi (degree+1, 0);
+  std::vector<double> cheb_points_eta (degree+1, 0);
+  double xi_range = 0.5*(max_xi - min_xi);
+  double eta_range = 0.5*(max_eta - min_eta);
+  double xi_offset = 0.5*(max_xi + min_xi);
+  double eta_offset = 0.5*(max_eta + min_eta);
+  for (int i = 0; i < degree+1; i++) {
+    cheb_points_xi[i] = xi_range*cheb_points[i]+xi_offset;
+    cheb_points_eta[i] = eta_range*cheb_points[i]+eta_offset;
+  }
+  // compute xi basis vals
+  bool found_xi_point = false;
+  double denom_xi, val;
+  std::vector<double> xi_func_vals (degree+1, 0);
+  for (int i = 0; i < degree+1; i++) {
+    if (abs(xi-cheb_points_xi[i]) < 1e-16) {
+      found_xi_point = true;
+      xi_func_vals[i] = 1;
+    }
+  }
+  if (not found_xi_point) {
+    denom_xi = 0;
+    for (int i = 0; i < degree+1; i++) {
+      val = bli_weights[i] / (xi - cheb_points_xi[i]);
+      xi_func_vals[i] = val;
+      denom_xi += val;
+    }
+    for (int i = 0; i < degree+1; i++) {
+      xi_func_vals[i] /= denom_xi;
+    }
+  }
+  // compute eta basis vals
+  bool found_eta_point = false;
+  double denom_eta;
+  std::vector<double> eta_func_vals (degree+1, 0);
+  for (int i = 0; i < degree+1; i++) {
+    if (abs(eta-cheb_points_eta[i]) < 1e-16) {
+      found_eta_point = true;
+      eta_func_vals[i] = 1;
+    }
+  }
+  if (not found_eta_point) {
+    denom_eta = 0;
+    for (int i = 0; i < degree+1; i++) {
+      val = bli_weights[i] / (eta - cheb_points_eta[i]);
+      eta_func_vals[i] = val;
+      denom_eta += val;
+    }
+    for (int i = 0; i < degree+1; i++) {
+      eta_func_vals[i] /= denom_eta;
+    }
+  }
+  // compute outer product
+  for (int i = 0; i < degree+1; i++) { // xi loop
+    for (int j = 0; j < degree+1; j++) { // eta loop
+      func_vals[i][j] = xi_func_vals[i] * eta_func_vals[j];
+    }
+  }
+  return func_vals;
+}
+
+std::vector<double> bli_interp_points_shift(const double min_x, const double max_x, const int degree) {
+  // returns xi points in this range
+  std::vector<double> cheb_points (degree+1, 0);
+  double x_range = 0.5*(max_x - min_x);
+  double x_offset = 0.5*(max_x + min_x);
+  for (int i = 0; i < degree+1; i++) {
+    cheb_points[i] = cos(M_PI / degree * i)*x_range + x_offset;
+  }
+  return cheb_points;
+}

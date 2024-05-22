@@ -36,31 +36,7 @@ double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> 
 
 int face_from_xyz(const double x, const double y, const double z);
 
-std::vector<double> xyz_from_xieta_1(const double xi, const double eta);
-
-std::vector<double> xyz_from_xieta_2(const double xi, const double eta);
-
-std::vector<double> xyz_from_xieta_3(const double xi, const double eta);
-
-std::vector<double> xyz_from_xieta_4(const double xi, const double eta);
-
-std::vector<double> xyz_from_xieta_5(const double xi, const double eta);
-
-std::vector<double> xyz_from_xieta_6(const double xi, const double eta);
-
 std::vector<double> xyz_from_xieta(const double xi, const double eta, const int face);
-
-std::vector<double> xieta_from_xyz_1(const double x, const double y, const double z);
-
-std::vector<double> xieta_from_xyz_2(const double x, const double y, const double z);
-
-std::vector<double> xieta_from_xyz_3(const double x, const double y, const double z);
-
-std::vector<double> xieta_from_xyz_4(const double x, const double y, const double z);
-
-std::vector<double> xieta_from_xyz_5(const double x, const double y, const double z);
-
-std::vector<double> xieta_from_xyz_6(const double x, const double y, const double z);
 
 std::vector<double> xieta_from_xyz(const double x, const double y, const double z);
 
