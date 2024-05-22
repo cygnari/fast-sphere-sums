@@ -57,8 +57,8 @@ int main(int argc, char **argv) {
   direct_sum_invert_laplacian(xcos, ycos, zcos, area, potential, integrated);
 
   end = std::chrono::steady_clock::now();
-  std::cout << "direct sum time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
-              << " microseconds" << std::endl;
+  std::cout << "direct sum time: " << std::chrono::duration<double>(end - begin).count()
+              << " seconds" << std::endl;
 
   std::string output_folder = create_config(run_information);
 

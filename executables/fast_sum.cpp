@@ -59,8 +59,8 @@ int main(int argc, char **argv) {
   fast_sum_inverse_laplacian_cube(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
 
   end = std::chrono::steady_clock::now();
-  std::cout << "fast sum time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
-              << " microseconds" << std::endl;
+  std::cout << "fast sum time: " << std::chrono::duration<double>(end - begin).count()
+              << " seconds" << std::endl;
 
   std::string output_folder = create_config(run_information);
 
