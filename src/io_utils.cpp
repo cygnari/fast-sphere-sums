@@ -97,15 +97,13 @@ std::string create_config(const RunConfig &run_information, const std::string ex
   std::stringstream ss1, ss2, ss3;
   int precision;
   std::string output_filename = std::to_string(run_information.time) + "_" +
-      std::to_string(run_information.point_count) + "_";
+      std::to_string(run_information.point_count) + "_" + run_information.initial_condition + "_";
   if (run_information.use_fast) {
-    output_filename +=
-        "fast_" + std::to_string(run_information.fast_sum_cluster_thresh) + "_" +
-        std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree);
+    output_filename += "fast_" + std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree) + "_";
     if (run_information.use_icos) {
-      output_filename += "icos_";
+      output_filename += "icos";
     } else {
-      output_filename += "cube_";
+      output_filename += "cube";
     }
   } else
     output_filename += "direct";

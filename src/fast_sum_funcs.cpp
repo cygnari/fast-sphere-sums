@@ -263,14 +263,11 @@ void cc_interaction_inverse_laplacian_icos(const RunConfig& run_information, con
 
   for (int i = 0; i < dim; i++) { // loop over proxy target particles
     target_particle = proxy_target_points[i];
-    // auto [ctlat, ctlon] = xyz_to_latlon(target_particle);
     cxt = target_particle[0];
     cyt = target_particle[1];
     czt = target_particle[2];
     for (int j = 0; j < dim; j++) { // loop over proxy source particles
-      // auto [cslat, cslon] = xyz_to_latlon(proxy_source_points[j]);
       source_particle = proxy_source_points[j];
-      // func_vals[dim*i + j] = sal_ces_gfunc(ctlat, ctlon, cslat, cslon, run_information.sph_harm_comps, llns);
       cxs = source_particle[0];
       cys = source_particle[1];
       czs = source_particle[2];
@@ -351,9 +348,11 @@ void pp_interaction_inverse_laplacian_cube(const RunConfig& run_information, con
     ty = ycos[target_i];
     tz = zcos[target_i];
     for (int j = 0; j < source_count; j++) {
-      sx = sxs[j], sy = sys[j], sz = szs[j];
-      gfval = -1.0/(4.0*M_PI)*log(1-tx*sx-ty*sy-tz*sz);
-      integral[target_i] += gfval * areas[j] * pots[j];
+      if (target_i != cube_panels[index_source].points_inside[j]) {
+        sx = sxs[j], sy = sys[j], sz = szs[j];
+        gfval = -1.0/(4.0*M_PI)*log(1-tx*sx-ty*sy-tz*sz);
+        integral[target_i] += gfval * areas[j] * pots[j];
+      }
     }
   }
 }
@@ -412,7 +411,7 @@ void cp_interaction_inverse_laplacian_cube(const RunConfig& run_information, con
                     const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // cp interaction
   int point_index, count_target = cube_panels[index_target].point_count, count_source = cube_panels[index_source].point_count, degree=run_information.interp_degree;
-  std::vector<double> cheb_xi, cheb_eta, sxs, sys, szs, areas, pots, xyz, xieta;
+  std::vector<double> cheb_xi, cheb_eta, sxs (count_source, 0), sys (count_source, 0), szs (count_source, 0), areas (count_source, 0), pots (count_source, 0), xyz, xieta;
   std::vector<std::vector<double>> func_points (degree+1, std::vector<double> (degree+1, 0)), basis_vals;
   double sx, sy, sz, tx, ty, tz;
 
@@ -455,6 +454,84 @@ void cp_interaction_inverse_laplacian_cube(const RunConfig& run_information, con
   }
 }
 
+void cc_interaction_inverse_laplacian_cube(const RunConfig& run_information, const int index_target, const int index_source, const std::vector<CubePanel>& cube_panels,
+                    const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
+                    const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+  // cc interaction
+  int point_index, count_target = cube_panels[index_target].point_count, count_source = cube_panels[index_source].point_count, degree=run_information.interp_degree;
+  std::vector<std::vector<double>> proxy_weights (degree+1, std::vector<double> (degree+1, 0)), basis_vals, func_vals (degree+1, std::vector<double> (degree+1, 0)), func_points (degree+1, std::vector<double> (degree+1, 0));
+  std::vector<double> txs (count_target, 0), tys (count_target, 0), tzs (count_target, 0), sxs (count_source, 0), sys (count_source, 0), szs (count_source, 0), areas (count_source, 0), pots (count_source, 0), xieta, cheb_xi_t, cheb_eta_t, cheb_xi_s, cheb_eta_s, xyz_t, xyz_s;
+  double pot, tx, ty, tz, cxs, cys, czs, cxt, cyt, czt, sx, sy, sz, xi_t, eta_t, xi_s, eta_s;
+
+  for (int i = 0; i < count_target; i++) {
+    point_index = cube_panels[index_target].points_inside[i];
+    txs[i] = xcos[point_index];
+    tys[i] = ycos[point_index];
+    tzs[i] = zcos[point_index];
+  }
+
+  for (int j = 0; j < count_source; j++) {
+    point_index = cube_panels[index_source].points_inside[j];
+    sxs[j] = xcos[point_index];
+    sys[j] = ycos[point_index];
+    szs[j] = zcos[point_index];
+    areas[j] = area[point_index];
+    pots[j] = potential[point_index];
+  }
+
+  cheb_xi_s = bli_interp_points_shift(cube_panels[index_source].min_xi, cube_panels[index_source].max_xi, degree);
+  cheb_eta_s = bli_interp_points_shift(cube_panels[index_source].min_eta, cube_panels[index_source].max_eta, degree);
+  cheb_xi_t = bli_interp_points_shift(cube_panels[index_target].min_xi, cube_panels[index_target].max_xi, degree);
+  cheb_eta_t = bli_interp_points_shift(cube_panels[index_target].min_eta, cube_panels[index_target].max_eta, degree);
+
+  // compute proxy weights
+  for (int i = 0; i < count_source; i++) {
+    // loop over source particles
+    point_index = cube_panels[index_source].points_inside[i];
+    sx = xcos[point_index], sy = ycos[point_index], sz = zcos[point_index];
+    xieta = xieta_from_xyz(sx, sy, sz, cube_panels[index_source].face);
+    basis_vals = interp_vals_bli(xieta[0], xieta[1], cube_panels[index_source].min_xi, cube_panels[index_source].max_xi, cube_panels[index_source].min_eta, cube_panels[index_source].max_eta, degree);
+    for (int j = 0; j < degree+1; j++) { // loop over xi
+      for (int k = 0; k < degree+1; k++) { // loop over eta
+        proxy_weights[j][k] += basis_vals[j][k] * area[point_index] * potential[point_index];
+      }
+    }
+  }
+
+  // computes func vals at proxy target points from proxy source points
+  for (int i = 0; i < degree+1; i++) { // target xi
+    xi_t = cheb_xi_t[i];
+    for (int j = 0; j < degree+1; j++) { // target eta
+      eta_t = cheb_eta_t[j];
+      xyz_t = xyz_from_xieta(xi_t, eta_t, cube_panels[index_target].face);
+      cxt = xyz_t[0], cyt = xyz_t[1], czt = xyz_t[2];
+      for (int k = 0; k < degree+1; k++) { // source xi
+        xi_s = cheb_xi_s[k];
+        for (int l = 0; l < degree+1; l++) { // source eta
+          eta_s = cheb_eta_s[l];
+          xyz_s = xyz_from_xieta(xi_s, eta_s, cube_panels[index_source].face);
+          cxs = xyz_s[0], cys = xyz_s[1], czs = xyz_s[2];
+          func_points[i][j] += -1.0/(4.0*M_PI)*log(1-cxs*cxt-cys*cyt-czs*czt)*proxy_weights[k][l];
+        }
+      }
+    }
+  }
+
+  for (int i = 0; i < count_target; i++) {
+    point_index = cube_panels[index_target].points_inside[i];
+    tx = xcos[point_index];
+    ty = ycos[point_index];
+    tz = zcos[point_index];
+    xieta = xieta_from_xyz(tx, ty, tz, cube_panels[index_target].face);
+    basis_vals = interp_vals_bli(xieta[0], xieta[1], cube_panels[index_target].min_xi, cube_panels[index_target].max_xi, cube_panels[index_target].min_eta, cube_panels[index_target].max_eta, degree);
+    for (int j = 0; j < degree+1; j++) {
+      for (int k = 0; k < degree+1; k++) {
+        integral[point_index] += basis_vals[j][k] * func_points[j][k];
+      }
+    }
+  }
+}
+
 void fast_sum_inverse_laplacian_cube(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels,
                                         const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                                         const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
@@ -471,7 +548,7 @@ void fast_sum_inverse_laplacian_cube(const RunConfig& run_information, const std
       cp_interaction_inverse_laplacian_cube(run_information, interactions[i].index_target, interactions[i].index_source, cube_panels, xcos, ycos, zcos, area, potential, integral);
     } else {
       // CC
-      // cc_interaction_inverse_laplacian_cube(run_information, interactions[i].index_target, interactions[i].index_source, cube_panels, xcos, ycos, zcos, area, potential, integral);
+      cc_interaction_inverse_laplacian_cube(run_information, interactions[i].index_target, interactions[i].index_source, cube_panels, xcos, ycos, zcos, area, potential, integral);
     }
   }
 }

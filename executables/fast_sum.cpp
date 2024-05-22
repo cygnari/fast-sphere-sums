@@ -19,6 +19,8 @@ int main(int argc, char **argv) {
   MPI_Comm_size(MPI_COMM_WORLD, &P);
   MPI_Comm_rank(MPI_COMM_WORLD, &ID);
 
+  std::chrono::steady_clock::time_point begin, end;
+
   RunConfig run_information;
   const std::string namelist_file = std::string(NAMELIST_DIR) + std::string("namelist.txt");
   read_run_config(namelist_file, run_information);
@@ -28,6 +30,7 @@ int main(int argc, char **argv) {
   std::vector<double> zcos (run_information.point_count, 0);
   std::vector<double> area (run_information.point_count, 0);
   std::vector<double> potential (run_information.point_count, 0);
+  std::vector<double> integrated (run_information.point_count, 0);
 
   std::string data_pre = DATA_DIR + std::to_string(run_information.point_count) + "_" + run_information.grid + "_";
 
@@ -50,6 +53,25 @@ int main(int argc, char **argv) {
 
   std::vector<InteractPair> interactions;
   dual_tree_traversal_cube(run_information, interactions, cube_panels);
+
+  begin = std::chrono::steady_clock::now();
+
+  fast_sum_inverse_laplacian_cube(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
+
+  end = std::chrono::steady_clock::now();
+  std::cout << "fast sum time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
+              << " microseconds" << std::endl;
+
+  std::string output_folder = create_config(run_information);
+
+  std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;
+  std::string command = "python ";
+  command += filename;
+  system(command.c_str());
+  std::string outpath = run_information.out_path + "/" + output_folder + "/output.csv";
+  write_state(integrated, outpath);
+  std::string potpath = run_information.out_path + "/" + output_folder + "/potential.csv";
+  write_state(potential, potpath);
   // std::cout << interactions.size() << std::endl;
 
 
