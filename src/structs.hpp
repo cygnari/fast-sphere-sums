@@ -22,6 +22,8 @@ struct RunConfig {
   double alph = 0.01; // 3 rotation coefficients
   double beta = 0.01;
   double gamm = 0.01;
+  double kernel_eps = 0.0; // kernel regularization parameter
+  // epsilon for regularized kernels, tension for interpolation kernel
 
   std::string initial_condition; // initial vorticity distribution
   int init_cond_param1;              // parameter for initial condition

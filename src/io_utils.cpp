@@ -143,9 +143,9 @@ void load_llns(const int sph_harm_comps, std::vector<double>& llns) {
   fin2.close();
 }
 
-void write_state(const std::vector<double> &data, const std::string path) {
+void write_state(const std::vector<double> &data, const std::string path, const std::string additional) {
   // write sal potential
-  std::ofstream write_out(path, std::ofstream::out | std::ofstream::trunc);
+  std::ofstream write_out(path + additional, std::ofstream::out | std::ofstream::trunc);
   for (int i = 0; i < data.size(); i++) { // write out state
     write_out << std::setprecision(16) << data[i] << "\n";
   }

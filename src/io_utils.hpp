@@ -17,6 +17,6 @@ void read_data_field(const int point_count, std::vector<double>& data, const std
 
 void load_llns(const int sph_harm_comps, std::vector<double>& llns);
 
-void write_state(const std::vector<double> &data, const std::string path);
+void write_state(const std::vector<double> &data, const std::string path, const std::string additional);
 
 #endif

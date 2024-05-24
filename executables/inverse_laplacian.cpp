@@ -2,10 +2,10 @@
 #include <mpi.h>
 #include <vector>
 #include <cmath>
-#include <chrono>
 
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
+#include "fast_sum_funcs.hpp"
 #include "general_utils.hpp"
 #include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
@@ -49,15 +49,41 @@ int main(int argc, char **argv) {
     balance_conditions(potential, area);
   }
 
-  // if (ID == 0) {
-  //   begin = std::chrono::steady_clock::now();
-  // }
-  begin = std::chrono::steady_clock::now();
+  if (run_information.use_fast) {
+    // use fast summation
+    if (run_information.use_icos) {
+      // icosahedral tree code
+      std::vector<IcosPanel> icos_panels;
+      initialize_icosahedron_tree(run_information, icos_panels, xcos, ycos, zcos);
 
-  direct_sum_invert_laplacian(xcos, ycos, zcos, area, potential, integrated);
+      std::vector<InteractPair> interactions;
+      dual_tree_traversal_icos(run_information, interactions, icos_panels);
 
-  end = std::chrono::steady_clock::now();
-  std::cout << "direct sum time: " << std::chrono::duration<double>(end - begin).count()
+      begin = std::chrono::steady_clock::now();
+      fast_sum_inverse_laplacian_icos(run_information, interactions, icos_panels, xcos, ycos, zcos, area, potential, integrated);
+      end = std::chrono::steady_clock::now();
+    } else {
+      // cubed sphere tree code
+      std::vector<CubePanel> cube_panels;
+      initialize_cube_tree(run_information, cube_panels, xcos, ycos, zcos);
+
+      std::vector<InteractPair> interactions;
+      dual_tree_traversal_cube(run_information, interactions, cube_panels);
+
+      begin = std::chrono::steady_clock::now();
+      fast_sum_inverse_laplacian_cube(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
+      end = std::chrono::steady_clock::now();
+    }
+  } else {
+    // direct summation
+    begin = std::chrono::steady_clock::now();
+    direct_sum_invert_laplacian(xcos, ycos, zcos, area, potential, integrated);
+    end = std::chrono::steady_clock::now();
+  }
+
+
+
+  std::cout << "fast sum time: " << std::chrono::duration<double>(end - begin).count()
               << " seconds" << std::endl;
 
   std::string output_folder = create_config(run_information);
@@ -66,10 +92,19 @@ int main(int argc, char **argv) {
   std::string command = "python ";
   command += filename;
   system(command.c_str());
-  std::string outpath = run_information.out_path + "/" + output_folder + "/output.csv";
-  write_state(integrated, outpath);
-  std::string potpath = run_information.out_path + "/" + output_folder + "/potential.csv";
-  write_state(potential, potpath);
+  std::string outpath = run_information.out_path + "/" + output_folder + "/";
+  write_state(integrated, outpath, "output.csv");
+  write_state(potential, outpath, "potential.csv");
+  write_state(xcos, outpath, "x.csv");
+  write_state(ycos, outpath, "y.csv");
+  write_state(zcos, outpath, "z.csv");
+  write_state(area, outpath, "areas.csv");
+  // std::string outpath = run_information.out_path + "/" + output_folder + "/output.csv";
+  // write_state(integrated, outpath);
+  // std::string potpath = run_information.out_path + "/" + output_folder + "/potential.csv";
+  // write_state(potential, potpath);
+  // std::cout << interactions.size() << std::endl;
+
 
   MPI_Finalize();
   return 0;

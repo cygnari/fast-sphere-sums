@@ -6,7 +6,7 @@
 #include "general_utils.hpp"
 #include "structs.hpp"
 
-void initialize_icosahedron(const RunConfig& run_information, std::vector<IcosPanel>& icos_panels, const std::vector<double>& x,
+void initialize_icosahedron_tree(const RunConfig& run_information, std::vector<IcosPanel>& icos_panels, const std::vector<double>& x,
         const std::vector<double>& y, const std::vector<double>& z) {
   // sets up fast sum icosahedron
   icos_panels.resize(20);

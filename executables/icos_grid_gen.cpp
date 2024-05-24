@@ -144,10 +144,10 @@ int main(int argc, char ** argv) {
   }
 
   std::string prefix = DATA_DIR + std::to_string(point_count) + "_icos_grid_";
-  write_state(xco, prefix + "x.csv");
-  write_state(yco, prefix + "y.csv");
-  write_state(zco, prefix + "z.csv");
-  write_state(areas, prefix + "areas.csv");
+  write_state(xco, prefix, "x.csv");
+  write_state(yco, prefix, "y.csv");
+  write_state(zco, prefix, "z.csv");
+  write_state(areas, prefix, "areas.csv");
 
   return 0;
 }

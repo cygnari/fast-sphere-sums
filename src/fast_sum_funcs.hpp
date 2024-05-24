@@ -5,7 +5,7 @@
 
 #include "structs.hpp"
 
-void fast_sum_inverse_laplacian_icos(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels,
+void fast_sum_inverse_laplacian_icos(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<IcosPanel>& cube_panels,
                                         const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                                         const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral);
 
