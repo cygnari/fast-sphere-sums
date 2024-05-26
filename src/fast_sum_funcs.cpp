@@ -1,5 +1,6 @@
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 #include "interp_utils.hpp"
 #include "general_utils.hpp"
@@ -31,9 +32,12 @@ void pp_interaction_inverse_laplacian_icos(const RunConfig& run_information, con
     ty = ycos[target_i];
     tz = zcos[target_i];
     for (int j = 0; j < source_count; j++) {
-      sx = sxs[j], sy = sys[j], sz = szs[j];
-      gfval = -1.0/(4.0*M_PI)*log(1-tx*sx-ty*sy-tz*sz);
-      integral[target_i] += gfval * areas[j] * pots[j];
+      source_j = icos_panels[index_source].points_inside[j];
+      if (target_i != source_j) {
+        sx = sxs[j], sy = sys[j], sz = szs[j];
+        gfval = -1.0/(4.0*M_PI)*log(1-tx*sx-ty*sy-tz*sz);
+        integral[target_i] += gfval * areas[j] * pots[j];
+      }
     }
   }
 }
@@ -86,7 +90,6 @@ void pc_interaction_inverse_laplacian_icos(const RunConfig& run_information, con
     cz *= scalar;
     bary_cord = barycoords(v1s, v2s, v3s, cx, cy, cz);
     interp_points[i]=bary_cord;
-    // auto [clat, clon] = xyz_to_latlon(cx, cy, cz);
     for (int j = 0; j < count_target; j++) { // loop over targets
       tx = txs[j];
       ty = tys[j];
@@ -213,7 +216,7 @@ void cc_interaction_inverse_laplacian_icos(const RunConfig& run_information, con
     sx = sxs[i];
     sy = sys[i];
     sz = szs[i];
-    pot = pots[point_index];
+    pot = pots[i];
     bary_cord = barycoords(v1s, v2s, v3s, sx, sy, sz);
     basis_vals = interp_vals_sbb(bary_cord[0], bary_cord[1], bary_cord[2], run_information.interp_degree);
     for (int j = 0; j < dim; j++) {
@@ -224,7 +227,7 @@ void cc_interaction_inverse_laplacian_icos(const RunConfig& run_information, con
   for (int i = 0; i < dim; i++) { // set up source interpolation matrix
     us = source_interp_points[i][0];
     vs = source_interp_points[i][1];
-    ws = 1.0 - us - vs;
+    ws = source_interp_points[i][2];
     cx = us * v1s[0] + vs * v2s[0] + ws * v3s[0];
     cy = us * v1s[1] + vs * v2s[1] + ws * v3s[1];
     cz = us * v1s[2] + vs * v2s[2] + ws * v3s[2];
@@ -292,7 +295,7 @@ void cc_interaction_inverse_laplacian_icos(const RunConfig& run_information, con
   }
 
   for (int i = 0; i < count_target; i++) {
-    // point_index = icos_panels[index_target].points_inside[i];
+    point_index = icos_panels[index_target].points_inside[i];
     tx = txs[i];
     ty = tys[i];
     tz = tzs[i];

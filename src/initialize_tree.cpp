@@ -61,30 +61,11 @@ void initialize_icosahedron_tree(const RunConfig& run_information, std::vector<I
     zval = z[i];
     point_found = false;
     for (int j = 0; j < 20; j++) {
-      point[0] = xval;
-      point[1] = yval;
-      point[2] = zval;
-      points[0] = icos_panels[j].vertex_1[0];
-      points[1] = icos_panels[j].vertex_1[1];
-      points[2] = icos_panels[j].vertex_1[2];
-      points[3] = icos_panels[j].vertex_2[0];
-      points[4] = icos_panels[j].vertex_2[1];
-      points[5] = icos_panels[j].vertex_2[2];
-      points[6] = icos_panels[j].vertex_3[0];
-      points[7] = icos_panels[j].vertex_3[1];
-      points[8] = icos_panels[j].vertex_3[2];
-
-      status = linear_solve(points, point, 3, 1, 1);
-      if (status > 0) {
-        throw std::runtime_error("Error with barycoordinate computation in icosahedron initialize, line 77");
-      }
+      point = barycoords(icos_panels[j].vertex_1, icos_panels[j].vertex_2, icos_panels[j].vertex_3, xval, yval, zval);
       if ((point[0] >= 0) and (point[1] >= 0) and (point[2] >= 0)) {
         point_found = true;
         icos_panels[j].point_count++;
         icos_panels[j].points_inside.push_back(i);
-      }
-
-      if (point_found) {
         break;
       }
     }
@@ -144,33 +125,15 @@ void initialize_icosahedron_tree(const RunConfig& run_information, std::vector<I
       for (int j = 0; j < points_to_assign.size(); j++) {
         // loop over points in parent panel
         point_found = false;
+        xval = x[points_to_assign[j]];
+        yval = y[points_to_assign[j]];
+        zval = z[points_to_assign[j]];
         for (int k = start; k < end; k++) {
-          // loop over child panels
-          point[0] = x[points_to_assign[j]];
-          point[1] = y[points_to_assign[j]];
-          point[2] = z[points_to_assign[j]];
-          points[0] = icos_panels[k].vertex_1[0];
-          points[1] = icos_panels[k].vertex_1[1];
-          points[2] = icos_panels[k].vertex_1[2];
-          points[3] = icos_panels[k].vertex_2[0];
-          points[4] = icos_panels[k].vertex_2[1];
-          points[5] = icos_panels[k].vertex_2[2];
-          points[6] = icos_panels[k].vertex_3[0];
-          points[7] = icos_panels[k].vertex_3[1];
-          points[8] = icos_panels[k].vertex_3[2];
-
-          status = linear_solve(points, point, 3, 1, 1);
-          if (status > 0) {
-            throw std::runtime_error("Error with barycoordinate computation in icosahedron initialize, line 162");
-          }
-
+          point = barycoords(icos_panels[k].vertex_1, icos_panels[k].vertex_2, icos_panels[k].vertex_3, xval, yval, zval);
           if ((point[0] >= 0) and (point[1] >= 0) and (point[2] >= 0)) {
             point_found = true;
             icos_panels[k].point_count++;
             icos_panels[k].points_inside.push_back(points_to_assign[j]);
-          }
-
-          if (point_found) {
             break;
           }
         }
@@ -205,7 +168,7 @@ void initialize_icosahedron_tree(const RunConfig& run_information, std::vector<I
     d = std::max(d1, std::max(d2, d3));
     icos_panels[i].radius = sqrt(d);
     if (icos_panels[i].point_count != icos_panels[i].points_inside.size()) {
-      throw std::runtime_error("Error in icosahedron initialization, line 207");
+      throw std::runtime_error("Error in icosahedron initialization, line 171");
     }
   }
 }

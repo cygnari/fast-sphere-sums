@@ -1,38 +1,19 @@
 #include <vector>
 #include <cmath>
 
-double sbb_coeff(const int deg, const int i, const int j) {
-  std::vector<double> log_vals(deg + 1, 0);
-  double accum = 0;
-  for (int k = 1; k < deg + 1; k++) {
-    log_vals[k] = log(k);
-    accum += log_vals[k];
-  }
-  for (int k = 1; k < i + 1; k++) {
-    accum -= log_vals[k];
-  }
-  for (int k = 1; k < j + 1; k++) {
-    accum -= log_vals[k];
-  }
-  for (int k = 1; k < (deg-i-j) + 1; k++) {
-    accum -= log_vals[k];
-  }
-  return exp(accum);
-}
-
 void fekete_init(std::vector<std::vector<double>> &points, const int degree) {
   double delta_x = 1.0 / degree;
   int index;
   double a, b, c, part;
   for (int i = 0; i < degree + 1; i++) {
-    a = 1 - i * delta_x;
-    a = 0.5 * (1 + sin(M_PI / 2 * (2 * a - 1)));
     for (int j = 0; j < i + 1; j++) {
       index = i * (i + 1) / 2 + j;
+      a = 1 - i * delta_x;
       c = j * delta_x;
-      b = i*delta_x - b;
+      b = 1 - a - c;
       b = 0.5 * (1 + sin(M_PI / 2 * (2 * b - 1)));
       c = 0.5 * (1 + sin(M_PI / 2 * (2 * c - 1)));
+      a = 0.5 * (1 + sin(M_PI / 2 * (2 * a - 1)));
       part = a + b + c;
       points[index][0] = a / part;
       points[index][1] = b / part;
@@ -54,20 +35,14 @@ void interp_mat_init_sbb(
     t = points[k][1];
     u = points[k][2];
     index = 0;
-    spart = 1;
-    tpart = 1;
     for (int i = 0; i < degree + 1; i++) {
+      spart = pow(s, i);
       for (int j = 0; j < degree+1-i; j++) {
-        val = spart * tpart;
-        if (degree - i -j != 0) {
-          val *= pow(u, degree-i-j);
-        }
+        tpart = pow(t, j);
         place = point_count * index + k;
-        mat[place] = val;
+        mat[place] = spart * tpart * pow(u, degree-i-j);
         index++;
-        tpart *= t;
       }
-      spart *= s;
     }
   }
 }
@@ -76,17 +51,17 @@ std::vector<double> interp_vals_sbb(const double s, const double t, const double
   // returns vector of SBB basis values of s, t, u
   int count = (degree + 1) * (degree + 2) / 2;
   std::vector<double> out_vals (count, 0);
-  double val, factor, spart = 1;
+  double val, factor, spart, tpart, upart;
   factor = t / u;
   int index = 0;
   for (int i = 0; i < degree + 1; i++) { // degree of s
-    val = spart * pow(u, degree - i);
+    spart = pow(s, i);
     for (int j = 0; j < degree + 1 - i; j++) {
-      out_vals[index] = val;
+      tpart = pow(t, j);
+      upart = pow(u, degree-i-j);
+      out_vals[index] = spart*tpart*upart;
       index += 1;
-      val *= factor;
     }
-    spart *= s;
   }
   return out_vals;
 }
@@ -97,16 +72,16 @@ double interp_eval_sbb(
                         // alpha and barycentric point (s, t, u)
   double accum = 0;
   int index = 0;
-  double val, factor, spart = 1;
-  factor = t / u;
+  double val, factor, spart, tpart, upart;
   for (int i = 0; i < degree + 1; i++) { // degree of s
-    val = spart * pow(u, degree - i);
+    spart = pow(s, i);
     for (int j = 0; j < degree + 1 - i; j++) {
+      tpart = pow(t, j);
+      upart = pow(u, degree-i-j);
+      val = spart * tpart * upart;
       accum += val * alphas[index];
       index += 1;
-      val *= factor;
     }
-    spart *= s;
   }
   return accum;
 }

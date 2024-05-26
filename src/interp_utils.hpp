@@ -3,8 +3,6 @@
 
 #include "structs.hpp"
 
-double sbb_coeff(const int deg, const int i, const int j);
-
 void fekete_init(std::vector<std::vector<double>> &points, const int degree);
 
 void interp_mat_init_sbb(std::vector<double> &mat, const std::vector<std::vector<double>> &points,

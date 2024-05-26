@@ -19,7 +19,7 @@ int check_point_exist(const std::vector<std::vector<int>> &parent_points,
 
 int main(int argc, char ** argv) {
   // generates an icosahedral grid with levels
-  int levels = 10;
+  int levels = 8;
   int point_count = 10 * pow(4, levels-1) + 2;
   int tri_count = 2 * (point_count - 2);
   // std::cout << point_count << std::endl;
