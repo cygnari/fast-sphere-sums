@@ -35,14 +35,16 @@ void interp_mat_init_sbb(
     t = points[k][1];
     u = points[k][2];
     index = 0;
+    spart = 1;
     for (int i = 0; i < degree + 1; i++) {
-      spart = pow(s, i);
+      tpart = 1;
       for (int j = 0; j < degree+1-i; j++) {
-        tpart = pow(t, j);
         place = point_count * index + k;
         mat[place] = spart * tpart * pow(u, degree-i-j);
         index++;
+        tpart *= t;
       }
+      spart *= s;
     }
   }
 }
@@ -54,14 +56,16 @@ std::vector<double> interp_vals_sbb(const double s, const double t, const double
   double val, factor, spart, tpart, upart;
   factor = t / u;
   int index = 0;
+  spart = 1;
   for (int i = 0; i < degree + 1; i++) { // degree of s
-    spart = pow(s, i);
+    tpart = 1;
     for (int j = 0; j < degree + 1 - i; j++) {
-      tpart = pow(t, j);
       upart = pow(u, degree-i-j);
       out_vals[index] = spart*tpart*upart;
       index += 1;
+      tpart *= t;
     }
+    spart *= s;
   }
   return out_vals;
 }
@@ -72,16 +76,17 @@ double interp_eval_sbb(
                         // alpha and barycentric point (s, t, u)
   double accum = 0;
   int index = 0;
-  double val, factor, spart, tpart, upart;
+  double val, factor, spart = 1, tpart, upart;
   for (int i = 0; i < degree + 1; i++) { // degree of s
-    spart = pow(s, i);
+    tpart = 1;
     for (int j = 0; j < degree + 1 - i; j++) {
-      tpart = pow(t, j);
       upart = pow(u, degree-i-j);
       val = spart * tpart * upart;
       accum += val * alphas[index];
       index += 1;
+      tpart *= t;
     }
+    spart *= s;
   }
   return accum;
 }

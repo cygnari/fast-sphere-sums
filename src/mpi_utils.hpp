@@ -5,6 +5,7 @@
 #include <mpi.h>
 #include <vector>
 #include <iostream>
+#include "structs.hpp"
 
 bool test_is_same(const int x, MPI_Comm mpi_communicator = MPI_COMM_WORLD);
 
@@ -23,5 +24,9 @@ template <typename T> void sync_updates(std::vector<T> &vals, const int P, const
   MPI_Win_fence(0, *win);
   MPI_Barrier(mpi_communicator);
 }
+
+void bounds_determine_1d(RunConfig& run_information, const int P, const int ID);
+
+void bounds_determine_2d(RunConfig& run_information, const int P, const int ID);
 
 #endif

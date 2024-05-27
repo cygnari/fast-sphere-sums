@@ -39,12 +39,13 @@ struct RunConfig {
   // mpi info
   int mpi_P;       // total MPI ranks
   int mpi_ID;      // own MPI rank
-  int particle_lb; // range of assigned particles
-  int particle_ub;
-  int particle_own;
-  int target_lb;
-  int target_ub;
-  int target_own;
+  int point_lb; // range of assigned particles
+  int point_ub;
+  int point_own;
+  int two_d_one_lb;
+  int two_d_one_ub;
+  int two_d_two_lb;
+  int two_d_two_ub;
 };
 
 struct CubePanel {
