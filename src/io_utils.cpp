@@ -72,18 +72,10 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
       if (stoi(word2) == 1) {
         run_information.use_cesaro = true;
       }
-    } else if (word1 == "tree") {
-      if (word2 == "icos") {
-        run_information.use_icos = true;
-      }
     } else if (word1 == "grid") {
       run_information.grid = word2;
     } else {
-      if (run_information.use_icos) {
-        run_information.interp_point_count = (run_information.interp_degree + 1) * (run_information.interp_degree + 2) / 2;
-      } else {
-        run_information.interp_point_count = pow(run_information.interp_degree + 1, 2);
-      }
+      run_information.interp_point_count = pow(run_information.interp_degree + 1, 2);
       if (run_information.fast_sum_cluster_thresh == -1) {
         run_information.fast_sum_cluster_thresh = run_information.interp_point_count + 2;
       }
@@ -100,11 +92,6 @@ std::string create_config(const RunConfig &run_information, const std::string ex
       std::to_string(run_information.point_count) + "_" + run_information.initial_condition + "_";
   if (run_information.use_fast) {
     output_filename += "fast_" + std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree) + "_";
-    if (run_information.use_icos) {
-      output_filename += "icos";
-    } else {
-      output_filename += "cube";
-    }
   } else
     output_filename += "direct";
   output_filename += extra;
@@ -114,16 +101,11 @@ std::string create_config(const RunConfig &run_information, const std::string ex
 void read_data_field(const int point_count, std::vector<double>& data, const std::string file_name) {
   // reads in double csv file_name to vector data
   std::ifstream file_in;
-  // file_in.open(DATA_DIR + run_information.grid + "_" + file_name + ".csv");
   file_in.open(file_name);
   std::string line;
-  // double d;
   for (int i = 0; i < point_count; i++) {
     getline(file_in, line, '\n');
-    // std::cout << line << std::endl;
-    // d = stod(line);
     data[i] = stod(line);
-    // std::cout << i << "," << line << "," << d << "," << data[i] << std::endl;
   }
   file_in.close();
 }

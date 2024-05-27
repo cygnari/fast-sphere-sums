@@ -60,34 +60,20 @@ int main(int argc, char **argv) {
 
   if (run_information.use_fast) {
     // use fast summation
-    if (run_information.use_icos) {
-      // icosahedral tree code
-      std::vector<IcosPanel> icos_panels;
-      initialize_icosahedron_tree(run_information, icos_panels, xcos, ycos, zcos);
+    std::vector<CubePanel> cube_panels;
+    initialize_cube_tree(run_information, cube_panels, xcos, ycos, zcos);
 
-      std::vector<InteractPair> interactions;
-      dual_tree_traversal_icos(run_information, interactions, icos_panels);
-
-      begin = std::chrono::steady_clock::now();
-      fast_sum_inverse_laplacian_icos(run_information, interactions, icos_panels, xcos, ycos, zcos, area, potential, integrated);
-      end = std::chrono::steady_clock::now();
-    } else {
-      // cubed sphere tree code
-      std::vector<CubePanel> cube_panels;
-      initialize_cube_tree(run_information, cube_panels, xcos, ycos, zcos);
-
-      std::vector<InteractPair> interactions;
-      begin = std::chrono::steady_clock::now();
-      dual_tree_traversal_cube(run_information, interactions, cube_panels);
-      end = std::chrono::steady_clock::now();
-      if (ID == 0) {
-        std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
-      }
-      begin = std::chrono::steady_clock::now();
-      fast_sum_inverse_laplacian_cube(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
-      sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
-      end = std::chrono::steady_clock::now();
+    std::vector<InteractPair> interactions;
+    begin = std::chrono::steady_clock::now();
+    dual_tree_traversal_cube(run_information, interactions, cube_panels);
+    end = std::chrono::steady_clock::now();
+    if (ID == 0) {
+      std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
     }
+    begin = std::chrono::steady_clock::now();
+    fast_sum_inverse_laplacian_cube(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
+    sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
+    end = std::chrono::steady_clock::now();
   } else {
     // direct summation
     bounds_determine_2d(run_information, P, ID);
@@ -98,7 +84,7 @@ int main(int argc, char **argv) {
   }
 
   if (ID == 0) {
-    std::cout << "fast sum time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
+    std::cout << "integration time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
 
     std::string output_folder = create_config(run_information);
     std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;

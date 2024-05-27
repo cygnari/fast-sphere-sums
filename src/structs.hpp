@@ -29,12 +29,11 @@ struct RunConfig {
   int init_cond_param1;              // parameter for initial condition
   int init_cond_param2;           // parameter for initial condition
   bool balance_condition = true;       // balance initial condition
-  // ICs: SH43, SH0
+  // ICs: SH43, SH10
 
   // fast sum info
   int fast_sum_cluster_thresh; // threshold for a panel being a cluster
   double fast_sum_theta;       // well separated threshold
-  bool use_icos = false;
 
   // mpi info
   int mpi_P;       // total MPI ranks
@@ -66,25 +65,6 @@ struct CubePanel {
   double max_eta;
   double radius;
   int point_count = 0; // number of points in this panel
-  std::vector<int> points_inside;
-
-};
-
-struct IcosPanel {
-  int level = 0; // refinement level, level 0 = base icosahedron
-  bool is_leaf = true; // whether or not this is a leaf panel
-  int id; // location in vector of icos panels
-  int parent_panel = -1;
-  int child_panel_1 = -1;
-  int child_panel_2 = -1;
-  int child_panel_3 = -1;
-  int child_panel_4 = -1;
-  std::vector<double> vertex_1 {0, 0, 0};
-  std::vector<double> vertex_2 {0, 0, 0};
-  std::vector<double> vertex_3 {0, 0, 0};
-  std::vector<double> center_p {0, 0, 0};
-  double radius;
-  int point_count = 0; // points inside the panel
   std::vector<int> points_inside;
 };
 
