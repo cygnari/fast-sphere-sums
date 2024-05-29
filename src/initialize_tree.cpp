@@ -141,7 +141,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
   }
 }
 
-void dual_tree_traversal_cube(const RunConfig& run_information, std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels) {
+void dual_tree_traversal(const RunConfig& run_information, std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels) {
   std::queue<int> target_squares;
   std::queue<int> source_squares;
   // top level interactions
@@ -229,6 +229,100 @@ void dual_tree_traversal_cube(const RunConfig& run_information, std::vector<Inte
           source_squares.push(cube_panels[index_source].child_panel_2);
           source_squares.push(cube_panels[index_source].child_panel_3);
           source_squares.push(cube_panels[index_source].child_panel_4);
+        }
+      }
+    }
+  }
+}
+
+void dual_tree_traversal(const RunConfig& run_information, std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels_target, const std::vector<CubePanel>& cube_panels_source) {
+  std::queue<int> target_squares;
+  std::queue<int> source_squares;
+  // top level interactions
+  for (int i = 0; i < 6; i++) {
+    for (int j = 0; j < 6; j++) {
+      target_squares.push(i);
+      source_squares.push(j);
+    }
+  }
+
+  int index_target, index_source;
+  std::vector<double> c1, c2;
+  double dist, separation;
+  while (target_squares.size() > 0) {
+    // dual tree traversal
+    index_target = target_squares.front();
+    index_source = source_squares.front();
+    target_squares.pop();
+    source_squares.pop();
+    if (cube_panels_target[index_target].point_count == 0) continue;
+    if (cube_panels_source[index_source].point_count == 0) continue;
+    c1 = xyz_from_xieta(cube_panels_target[index_target].mid_xi, cube_panels_target[index_target].mid_eta, cube_panels_target[index_target].face);
+    c2 = xyz_from_xieta(cube_panels_source[index_source].mid_xi, cube_panels_source[index_source].mid_eta, cube_panels_source[index_source].face);
+    dist = gcdist(c1, c2, run_information.radius);
+    separation = (cube_panels_target[index_target].radius + cube_panels_source[index_source].radius) / dist;
+    if ((dist > 0) and (separation < run_information.fast_sum_theta)) {
+      // well separated
+      InteractPair new_interact = {index_target, index_source, 0};
+      if (cube_panels_target[index_target].point_count > run_information.fast_sum_cluster_thresh) {
+        new_interact.interact_type += 2;
+      }
+      if (cube_panels_source[index_source].point_count > run_information.fast_sum_cluster_thresh) {
+        new_interact.interact_type += 1;
+      }
+      interactions.push_back(new_interact);
+    } else {
+      // not well separated
+      if ((cube_panels_target[index_target].point_count < run_information.fast_sum_cluster_thresh) and (cube_panels_source[index_source].point_count < run_information.fast_sum_cluster_thresh)) {
+        // both have few points
+        InteractPair new_interact = {index_target, index_source, 0};
+        interactions.push_back(new_interact);
+      } else if (cube_panels_target[index_target].is_leaf and cube_panels_source[index_source].is_leaf) {
+        // both are leaves
+        InteractPair new_interact = {index_target, index_source, 0};
+        interactions.push_back(new_interact);
+      } else if (cube_panels_target[index_target].is_leaf) {
+        // target is leaf, break apart source
+        target_squares.push(index_target);
+        target_squares.push(index_target);
+        target_squares.push(index_target);
+        target_squares.push(index_target);
+        source_squares.push(cube_panels_source[index_source].child_panel_1);
+        source_squares.push(cube_panels_source[index_source].child_panel_2);
+        source_squares.push(cube_panels_source[index_source].child_panel_3);
+        source_squares.push(cube_panels_source[index_source].child_panel_4);
+      } else if (cube_panels_source[index_source].is_leaf) {
+        // source is leaf, break apart target
+        source_squares.push(index_source);
+        source_squares.push(index_source);
+        source_squares.push(index_source);
+        source_squares.push(index_source);
+        target_squares.push(cube_panels_target[index_target].child_panel_1);
+        target_squares.push(cube_panels_target[index_target].child_panel_2);
+        target_squares.push(cube_panels_target[index_target].child_panel_3);
+        target_squares.push(cube_panels_target[index_target].child_panel_4);
+      } else {
+        // neither panel is a leaf, refine the panel with more points
+        if (cube_panels_target[index_target].point_count >= cube_panels_source[index_source].point_count) {
+          // target has more points, break apart target
+          source_squares.push(index_source);
+          source_squares.push(index_source);
+          source_squares.push(index_source);
+          source_squares.push(index_source);
+          target_squares.push(cube_panels_target[index_target].child_panel_1);
+          target_squares.push(cube_panels_target[index_target].child_panel_2);
+          target_squares.push(cube_panels_target[index_target].child_panel_3);
+          target_squares.push(cube_panels_target[index_target].child_panel_4);
+        } else {
+          // source has more points, break apart
+          target_squares.push(index_target);
+          target_squares.push(index_target);
+          target_squares.push(index_target);
+          target_squares.push(index_target);
+          source_squares.push(cube_panels_source[index_source].child_panel_1);
+          source_squares.push(cube_panels_source[index_source].child_panel_2);
+          source_squares.push(cube_panels_source[index_source].child_panel_3);
+          source_squares.push(cube_panels_source[index_source].child_panel_4);
         }
       }
     }

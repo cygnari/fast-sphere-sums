@@ -34,6 +34,8 @@ std::vector<double> barycoords(const std::vector<double> &p1, const std::vector<
 
 double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> &p2, const std::vector<double> &p3, const double radius);
 
+double dilog(const double x);
+
 int face_from_xyz(const double x, const double y, const double z);
 
 std::vector<double> xyz_from_xieta(const double xi, const double eta, const int face);
