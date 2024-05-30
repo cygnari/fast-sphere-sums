@@ -30,7 +30,7 @@ void fast_sum_inverse_laplacian(const RunConfig& run_information, const std::vec
   }
 }
 
-void fast_sum_inverse_biharmonic(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels_target, const std::vector<CubePanel>& cube_panels_source,
+void fast_sum_inverse_biharmonic(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels_source, const std::vector<CubePanel>& cube_panels_target,
                                         const std::vector<double>& xcos_t, const std::vector<double>& ycos_t, const std::vector<double>& zcos_t,
                                         const std::vector<double>& xcos_s, const std::vector<double>& ycos_s, const std::vector<double>& zcos_s,
                                         const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
@@ -43,11 +43,15 @@ void fast_sum_inverse_biharmonic(const RunConfig& run_information, const std::ve
       if (interactions[i].interact_type == 0) { // PP
         pp_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
       } else if (interactions[i].interact_type == 1) { // PC
+        // pp_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
         pc_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
       } else if (interactions[i].interact_type == 2) { // CP
+        // pp_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
         cp_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
       } else { // CC
-        cc_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
+        pp_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
+        // pc_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
+        // cc_interaction_inverse_biharmonic(run_information, cube_panels_source[i_s], cube_panels_target[i_t], xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integral);
       }
     }
   }

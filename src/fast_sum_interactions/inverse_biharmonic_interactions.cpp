@@ -13,7 +13,6 @@ void pp_interaction_inverse_biharmonic(const RunConfig& run_information, const C
   // compute particle particle interaction
   int target_i, source_j, source_count;
   double tx, ty, tz, sx, sy, sz, gfval;
-  const double gfc = 2.0 - pow(M_PI, 2)/6.0;
 
   source_count = cube_panel_source.point_count;
 
@@ -35,11 +34,8 @@ void pp_interaction_inverse_biharmonic(const RunConfig& run_information, const C
     tz = zcos_t[target_i];
     for (int j = 0; j < source_count; j++) {
       sx = sxs[j], sy = sys[j], sz = szs[j];
-      // if ((abs(tx - sx) < 1e-15) and (abs(ty - sy) < 1e-15) and (abs(tz - sz) < 1e-15)) {
-        // sx = sxs[j], sy = sys[j], sz = szs[j];
-      gfval = gfc+dilog(0.5*(1-tx*sx-ty*sy-tz*sz));
+      gfval = -1.0/(4.0*M_PI)*dilog(0.5*(1-tx*sx-ty*sy-tz*sz));
       integral[target_i] += gfval * areas[j] * pots[j];
-      // }
     }
   }
 }
@@ -53,7 +49,7 @@ void pc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
   std::vector<std::vector<double>> proxy_weights (degree+1, std::vector<double> (degree+1, 0)), basis_vals, func_vals (degree+1, std::vector<double> (degree+1, 0));
   std::vector<double> txs (count_target, 0), tys (count_target, 0), tzs (count_target, 0), xieta, cheb_xi, cheb_eta, xyz;
   double pot, tx, ty, tz, cx, cy, cz, sx, sy, sz, xi, eta;
-  const double gfc = 2.0 - pow(M_PI, 2)/6.0;
+  // const double gfc = 2.0 - pow(M_PI, 2)/6.0;
 
   for (int i = 0; i < count_target; i++) {
     point_index = cube_panel_target.points_inside[i];
@@ -89,7 +85,9 @@ void pc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
       for (int k = 0; k < degree+1; k++) { // eta loop
         eta = cheb_eta[k];
         xyz = xyz_from_xieta(xi, eta, cube_panel_source.face);
-        integral[point_index] += (gfc+dilog(0.5*(1-tx*xyz[0]-ty*xyz[1]-tz*xyz[2]))) * proxy_weights[j][k];
+        // sx = xyz[0], sy = xyz[1], sz = xyz[2];
+        // integral[point_index] += (gfc+dilog(0.5*(1-tx*xyz[0]-ty*xyz[1]-tz*xyz[2]))) * proxy_weights[j][k];
+        integral[point_index] += -1.0/(4.0*M_PI)*dilog(0.5*(1-tx*xyz[0]-ty*xyz[1]-tz*xyz[2])) * proxy_weights[j][k];
       }
     }
   }
@@ -104,7 +102,7 @@ void cp_interaction_inverse_biharmonic(const RunConfig& run_information, const C
   std::vector<double> cheb_xi, cheb_eta, sxs (count_source, 0), sys (count_source, 0), szs (count_source, 0), areas (count_source, 0), pots (count_source, 0), xyz, xieta;
   std::vector<std::vector<double>> func_points (degree+1, std::vector<double> (degree+1, 0)), basis_vals;
   double sx, sy, sz, tx, ty, tz;
-  const double gfc = 2.0 - pow(M_PI, 2)/6.0;
+  // const double gfc = 2.0 - pow(M_PI, 2)/6.0;
 
   for (int j = 0; j < count_source; j++) {
     point_index = cube_panel_source.points_inside[j];
@@ -124,8 +122,8 @@ void cp_interaction_inverse_biharmonic(const RunConfig& run_information, const C
       for (int k = 0; k < count_source; k++) {
         // loop over source points
         sx = sxs[k], sy = sys[k], sz = szs[k];
-
-        func_points[i][j] += (gfc+dilog(0.5*(1-sx*xyz[0]-sy*xyz[1]-sz*xyz[2]))) * areas[k]*pots[k];
+        // func_points[i][j] += (gfc+dilog(0.5*(1-sx*xyz[0]-sy*xyz[1]-sz*xyz[2]))) * areas[k]*pots[k];
+        func_points[i][j] += -1.0/(4.0*M_PI)*dilog(0.5*(1-sx*xyz[0]-sy*xyz[1]-sz*xyz[2]))*areas[k]*pots[k];
       }
     }
   }
@@ -155,7 +153,7 @@ void cc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
   std::vector<std::vector<double>> proxy_weights (degree+1, std::vector<double> (degree+1, 0)), basis_vals, func_vals (degree+1, std::vector<double> (degree+1, 0)), func_points (degree+1, std::vector<double> (degree+1, 0));
   std::vector<double> txs (count_target, 0), tys (count_target, 0), tzs (count_target, 0), sxs (count_source, 0), sys (count_source, 0), szs (count_source, 0), areas (count_source, 0), pots (count_source, 0), xieta, cheb_xi_t, cheb_eta_t, cheb_xi_s, cheb_eta_s, xyz_t, xyz_s;
   double pot, tx, ty, tz, cxs, cys, czs, cxt, cyt, czt, sx, sy, sz, xi_t, eta_t, xi_s, eta_s;
-  const double gfc = 2.0 - pow(M_PI, 2)/6.0;
+  // const double gfc = 2.0 - pow(M_PI, 2)/6.0;
 
   for (int i = 0; i < count_target; i++) {
     point_index = cube_panel_target.points_inside[i];
@@ -206,7 +204,8 @@ void cc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
           eta_s = cheb_eta_s[l];
           xyz_s = xyz_from_xieta(xi_s, eta_s, cube_panel_source.face);
           cxs = xyz_s[0], cys = xyz_s[1], czs = xyz_s[2];
-          func_points[i][j] += (gfc+dilog(0.5*(1-cxs*cxt-cys*cyt-czs*czt)))*proxy_weights[k][l];
+          // func_points[i][j] += (gfc+dilog(0.5*(1-cxs*cxt-cys*cyt-czs*czt)))*proxy_weights[k][l];
+          func_points[i][j]+=-1.0/(4.0*M_PI)*dilog(0.5*(1-cxs*cxt-cys*cyt-czs*czt))*proxy_weights[k][l];
         }
       }
     }
@@ -214,9 +213,9 @@ void cc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
 
   for (int i = 0; i < count_target; i++) {
     point_index = cube_panel_target.points_inside[i];
-    // tx = xcos[point_index];
-    // ty = ycos[point_index];
-    // tz = zcos[point_index];
+    // tx = xcos_t[point_index];
+    // ty = ycos_t[point_index];
+    // tz = zcos_t[point_index];
     tx = txs[i], ty = tys[i], tz = tzs[i];
     xieta = xieta_from_xyz(tx, ty, tz, cube_panel_target.face);
     basis_vals = interp_vals_bli(xieta[0], xieta[1], cube_panel_target.min_xi, cube_panel_target.max_xi, cube_panel_target.min_eta, cube_panel_target.max_eta, degree);

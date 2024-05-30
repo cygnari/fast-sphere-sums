@@ -19,7 +19,6 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
     cube_panels[i].face = i+1;
   }
 
-
   double xval, yval, zval;
   std::vector<double> point_on_cube;
   bool found, point_found;
