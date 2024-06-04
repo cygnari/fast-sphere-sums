@@ -260,7 +260,9 @@ void dual_tree_traversal(const RunConfig& run_information, std::vector<InteractP
     c2 = xyz_from_xieta(cube_panels_source[index_source].mid_xi, cube_panels_source[index_source].mid_eta, cube_panels_source[index_source].face);
     dist = gcdist(c1, c2, run_information.radius);
     separation = (cube_panels_target[index_target].radius + cube_panels_source[index_source].radius) / dist;
+    // separation = c1[0]*c2[0] + c1[1]*c2[1] + c1[2]*c2[2];
     if ((dist > 0) and (separation < run_information.fast_sum_theta)) {
+    // if (separation < 0.25) {
       // well separated
       InteractPair new_interact = {index_target, index_source, 0};
       if (cube_panels_target[index_target].point_count > run_information.fast_sum_cluster_thresh) {

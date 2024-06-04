@@ -10,8 +10,10 @@ struct RunConfig {
   int write_precision = 6; // number of decimal places, 6 for data visualization, 16 for error testing
   bool write_output = false;
   double radius = 1.0;
-  int point_count;    // number of dynamics points, full point count is 2313486 for mpas grid
+  int point_count;    // number of dynamics points
   // 2562, 10242, 40962, 163842, 655362, 2621442 for icos grid
+  // full point count is 2313486 for mpas grid
+  // 453657 points for mom6
   int interp_degree;      // interpolation degree
   int interp_point_count; // number of interpolation points
   int info_per_point; // how many doubles each point is, for example, storing x y z vor tracer = 5

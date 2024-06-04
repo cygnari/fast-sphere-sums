@@ -93,7 +93,9 @@ double interp_eval_sbb(
 
 double bli_coeff(const int j, const int degree) {
   // bli weight
-  if (j == 0) {
+  if (degree == 0) {
+    return 1;
+  } else if (j == 0) {
     return 0.5;
   } else if (j == degree) {
     return 0.5 * pow(-1, j);
@@ -106,9 +108,14 @@ std::vector<std::vector<double>> interp_vals_bli(const double xi, const double e
   // returns matrix of BLI basis values
   std::vector<double> cheb_points (degree+1, 0), bli_weights (degree+1, 0);
   std::vector<std::vector<double>> func_vals (degree+1, std::vector<double> (degree+1, 0));
-  for (int i = 0; i < degree+1; i++) {
-    cheb_points[i] = cos(M_PI / degree * i);
-    bli_weights[i] = bli_coeff(i, degree);
+  if (degree == 0) {
+    cheb_points[0] = 0;
+    bli_weights[0] = 1;
+  } else {
+    for (int i = 0; i < degree+1; i++) {
+      cheb_points[i] = cos(M_PI / degree * i);
+      bli_weights[i] = bli_coeff(i, degree);
+    }
   }
   // translate weights
   std::vector<double> cheb_points_xi (degree+1, 0);
@@ -177,8 +184,12 @@ std::vector<double> bli_interp_points_shift(const double min_x, const double max
   std::vector<double> cheb_points (degree+1, 0);
   double x_range = 0.5*(max_x - min_x);
   double x_offset = 0.5*(max_x + min_x);
-  for (int i = 0; i < degree+1; i++) {
-    cheb_points[i] = cos(M_PI / degree * i)*x_range + x_offset;
+  if (degree == 0) {
+    cheb_points[0] = x_offset;
+  } else {
+    for (int i = 0; i < degree+1; i++) {
+      cheb_points[i] = cos(M_PI / degree * i)*x_range + x_offset;
+    }
   }
   return cheb_points;
 }
