@@ -34,7 +34,11 @@ std::vector<double> barycoords(const std::vector<double> &p1, const std::vector<
 
 double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> &p2, const std::vector<double> &p3, const double radius);
 
-double sal_gf_rat_interp_200(const double x);
+double sal_gf_interp_40(const double x);
+
+double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3);
+
+double sal_gf_lon_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3);
 
 double dilog(const double x);
 

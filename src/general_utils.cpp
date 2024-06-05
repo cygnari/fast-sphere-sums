@@ -183,39 +183,71 @@ double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> 
   return area;
 }
 
-double sal_gf_rat_interp_200(const double x) {
-  // rational interpolant for cesaro summed SAL GF with 200 SH components
+double sal_gf_interp_40(const double x) {
   // x is cos(theta) or dot product of two points
-  // const double P[] = {
-  //   -0.02020801078964052,
-  //   -0.00310765673521763,
-  //   0.06174947219869593,
-  //   0.02162256346118640,
-  //   0.04697917846782146,
-  //   0.01764356614354666,
-  //   0.006871257633616609,
-  // };
-  // const double Q[] = {
-  //   1.0,
-  //   0.4578723596651982,
-  //   -2.352009451203516,
-  //   -0.7865865944288321,
-  //   1.841073034497468,
-  //   0.3413533820295469,
-  //   -0.5015522735169563,
-  // };
-  //
-  // const double x2 = x*x;
-  // const double x3 = x*x2;
-  // const double x4 = x2*x2;
-  // const double x5 = x2*x3;
-  // const double x6 = x3*x3;
-  // const double p = P[0]+P[1]*x+P[2]*x2+P[3]*x3+P[4]*x4+P[5]*x5+P[6]*x6;
-  // const double q = Q[0]+Q[1]*x+Q[2]*x2+Q[3]*x3+Q[4]*x4+Q[5]*x5+Q[6]*x6;
-  // return p/q;
-  double part1 = 0.000018/pow(1.02-x,3);
-  double part2 = 0.001*(x-0.981)*exp(-pow(-x-0.981, 3));
-  return -0.0235+part1+part2;
+  // conjectured technique
+  double eps = 1e-8;
+  double mp = 2-2*x;
+  double sqp = sqrt(mp+eps);
+  double part1 = 6.21196/sqp;
+  double part2 = (-2.7-6)*log(sqp+mp);
+  return part1+part2;
+}
+
+double sal_gf_deriv_interp_40(const double x) {
+  // x is cos(theta) or dot product of two points
+  double eps=1e-12;
+  double mp = 2-2*x;
+  double sqp = sqrt(mp);
+  double cbp = sqp*mp;
+  double part1 = 6.21196/(cbp+eps);
+  double part2 = (-2.7-6)*(2*sqp+1)/(mp+cbp+eps);
+  return part1-part2;
+}
+
+double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3) {
+  if (abs(x3-1)<1e-15) {
+    return 0;
+  } else if (abs(x3+1)<1e-15) {
+    return 0;
+  } else {
+    double val = sal_gf_deriv_interp_40(x1*y1+x2*y2+x3*y3);
+    double x32 = x3*x3;
+    double part1 = y3*(1-x32)-x3*(1.0-x3*y3);
+    double part2 = sqrt(1-x32);
+    return val*part1/part2;
+    // double delta_theta=0.001;
+    // std::vector<double> ll = xyz_to_latlon(x1, x2, x3);
+    // double lat = ll[0], lon=ll[1];
+    // double lat1=lat+delta_theta, lat2=lat-delta_theta;
+    // std::vector<double> xyz = latlon_to_xyz(lat1, lon, 1.0);
+    // double val1 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
+    // xyz = latlon_to_xyz(lat2, lon, 1.0);
+    // double val2 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
+    // return (val1-val2)/(2*delta_theta);
+  }
+}
+
+double sal_gf_lon_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3) {
+  if (abs(x3-1)<1e-15) {
+    return 0;
+  } else if (abs(x3+1)<1e-15) {
+    return 0;
+  } else {
+    double val = sal_gf_deriv_interp_40(x1*y1+x2*y2+x3*y3);
+    double part1 = x1*y2-x2*y1;
+    double part2 = sqrt(1-x3*x3);
+    return val*part1/part2;
+    // double delta_theta=0.001;
+    // std::vector<double> ll = xyz_to_latlon(x1, x2, x3);
+    // double lat = ll[0], lon=ll[1];
+    // double lon1=lon+delta_theta, lon2=lon-delta_theta;
+    // std::vector<double> xyz = latlon_to_xyz(lat, lon1, 1.0);
+    // double val1 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
+    // xyz = latlon_to_xyz(lat, lon2, 1.0);
+    // double val2 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
+    // return (val1-val2)/(2*delta_theta);
+  }
 }
 
 double dilog(const double x) {

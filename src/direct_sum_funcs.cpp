@@ -44,7 +44,35 @@ void direct_sum_sal(const RunConfig& run_information, const std::vector<double>&
     // for (int j = 0; j < xcos.size(); j++) { // loop over sources
     for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
       sx = xcos[j], sy = ycos[j], sz = zcos[j];
-      integral[i] += sal_gf_rat_interp_200(tx*sx+ty*sy+tz*sz)*potential[j]*area[j];
+      integral[i] += sal_gf_interp_40(tx*sx+ty*sy+tz*sz)*potential[j]*area[j];
+    }
+  }
+}
+
+void direct_sum_sal_lat_deriv(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+  // perform direct summation to compute the SAL potential
+  double tx, ty, tz, sx, sy, sz;
+  // for (int i = 0; i < xcos.size(); i++) { // loop over targets
+  for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
+    tx = xcos[i], ty = ycos[i], tz = zcos[i];
+    // for (int j = 0; j < xcos.size(); j++) { // loop over sources
+    for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
+      sx = xcos[j], sy = ycos[j], sz = zcos[j];
+      integral[i] += sal_gf_lat_deriv(tx, ty, tz, sx, sy, sz)*potential[j]*area[j];
+    }
+  }
+}
+
+void direct_sum_sal_lon_deriv(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+  // perform direct summation to compute the SAL potential
+  double tx, ty, tz, sx, sy, sz;
+  // for (int i = 0; i < xcos.size(); i++) { // loop over targets
+  for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
+    tx = xcos[i], ty = ycos[i], tz = zcos[i];
+    // for (int j = 0; j < xcos.size(); j++) { // loop over sources
+    for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
+      sx = xcos[j], sy = ycos[j], sz = zcos[j];
+      integral[i] += sal_gf_lon_deriv(tx, ty, tz, sx, sy, sz)*potential[j]*area[j];
     }
   }
 }

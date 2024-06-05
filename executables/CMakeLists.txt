@@ -19,6 +19,13 @@ target_include_directories(sal PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>)
 
+add_executable(sal_derivs sal_derivs.cpp)
+target_link_libraries(sal_derivs PUBLIC FastSphereSums)
+target_include_directories(sal_derivs PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
 add_executable(icos_grid_gen icos_grid_gen.cpp)
 target_link_libraries(icos_grid_gen PUBLIC FastSphereSums)
 target_include_directories(icos_grid_gen PUBLIC

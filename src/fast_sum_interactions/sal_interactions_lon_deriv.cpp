@@ -6,7 +6,7 @@
 #include "../general_utils.hpp"
 #include "../structs.hpp"
 
-void pp_interaction_sal(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
+void pp_interaction_sal_lon_deriv(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
                     const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                     const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // compute particle particle interaction
@@ -34,14 +34,14 @@ void pp_interaction_sal(const RunConfig& run_information, const CubePanel& cube_
     for (int j = 0; j < source_count; j++) {
       if (target_i != cube_panel_source.points_inside[j]) {
         sx = sxs[j], sy = sys[j], sz = szs[j];
-        gfval = sal_gf_interp_40(tx*sx+ty*sy+tz*sz);
+        gfval = sal_gf_lon_deriv(tx, ty, tz, sx, sy, sz);
         integral[target_i] += gfval * areas[j] * pots[j];
       }
     }
   }
 }
 
-void pc_interaction_sal(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
+void pc_interaction_sal_lon_deriv(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
                     const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                     const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // pc interaction
@@ -84,13 +84,13 @@ void pc_interaction_sal(const RunConfig& run_information, const CubePanel& cube_
       for (int k = 0; k < degree+1; k++) { // eta loop
         eta = cheb_eta[k];
         xyz = xyz_from_xieta(xi, eta, cube_panel_source.face);
-        integral[point_index] += sal_gf_interp_40(tx*xyz[0]+ty*xyz[1]+tz*xyz[2]) * proxy_weights[j][k];
+        integral[point_index] += sal_gf_lon_deriv(tx, ty, tz, xyz[0], xyz[1], xyz[2]) * proxy_weights[j][k];
       }
     }
   }
 }
 
-void cp_interaction_sal(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
+void cp_interaction_sal_lon_deriv(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
                     const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                     const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // cp interaction
@@ -117,7 +117,7 @@ void cp_interaction_sal(const RunConfig& run_information, const CubePanel& cube_
       for (int k = 0; k < count_source; k++) {
         // loop over source points
         sx = sxs[k], sy = sys[k], sz = szs[k];
-        func_points[i][j] += sal_gf_interp_40(sx*xyz[0]+sy*xyz[1]+sz*xyz[2]) * areas[k]*pots[k];
+        func_points[i][j] += sal_gf_lon_deriv(xyz[0], xyz[1], xyz[2], sx, sy, sz) * areas[k]*pots[k];
       }
     }
   }
@@ -138,7 +138,7 @@ void cp_interaction_sal(const RunConfig& run_information, const CubePanel& cube_
   }
 }
 
-void cc_interaction_sal(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
+void cc_interaction_sal_lon_deriv(const RunConfig& run_information, const CubePanel& cube_panel_source, const CubePanel& cube_panel_target,
                     const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                     const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // cc interaction
@@ -195,7 +195,7 @@ void cc_interaction_sal(const RunConfig& run_information, const CubePanel& cube_
           eta_s = cheb_eta_s[l];
           xyz_s = xyz_from_xieta(xi_s, eta_s, cube_panel_source.face);
           cxs = xyz_s[0], cys = xyz_s[1], czs = xyz_s[2];
-          func_points[i][j] += sal_gf_interp_40(cxs*cxt+cys*cyt+czs*czt)*proxy_weights[k][l];
+          func_points[i][j] += sal_gf_lon_deriv(cxt, cyt, czt, cxs, cys, czs)*proxy_weights[k][l];
         }
       }
     }

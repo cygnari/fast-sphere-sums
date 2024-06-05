@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   MPI_Status status;
   MPI_Comm_size(MPI_COMM_WORLD, &P);
   MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-  MPI_Win win_sal;
+  MPI_Win win_lat, win_lon;
 
   MPI_Datatype dt_interaction;
   MPI_Type_contiguous(3, MPI_INT, &dt_interaction);
@@ -39,9 +39,11 @@ int main(int argc, char **argv) {
   std::vector<double> zcos (run_information.point_count, 0);
   std::vector<double> area (run_information.point_count, 0);
   std::vector<double> sshs (run_information.point_count, 0);
-  std::vector<double> sals (run_information.point_count, 0);
+  std::vector<double> sals_lat_deriv (run_information.point_count, 0);
+  std::vector<double> sals_lon_deriv (run_information.point_count, 0);
 
-  MPI_Win_create(&sals[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_sal);
+  MPI_Win_create(&sals_lat_deriv[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_lat);
+  MPI_Win_create(&sals_lon_deriv[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_lon);
 
   std::string data_pre = DATA_DIR + std::to_string(run_information.point_count) + "_" + run_information.grid + "_";
 
@@ -72,15 +74,19 @@ int main(int argc, char **argv) {
       std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
     }
     begin = std::chrono::steady_clock::now();
-    fast_sum_sal(run_information, interactions, cube_panels, xcos, ycos, zcos, area, sshs, sals);
-    sync_updates<double>(sals, P, ID, &win_sal, MPI_DOUBLE);
+    fast_sum_sal_lat_deriv(run_information, interactions, cube_panels, xcos, ycos, zcos, area, sshs, sals_lat_deriv);
+    fast_sum_sal_lon_deriv(run_information, interactions, cube_panels, xcos, ycos, zcos, area, sshs, sals_lon_deriv);
+    sync_updates<double>(sals_lat_deriv, P, ID, &win_lat, MPI_DOUBLE);
+    sync_updates<double>(sals_lon_deriv, P, ID, &win_lon, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   } else {
     // direct summation
     bounds_determine_2d(run_information, P, ID);
     begin = std::chrono::steady_clock::now();
-    direct_sum_sal(run_information, xcos, ycos, zcos, area, sshs, sals);
-    sync_updates<double>(sals, P, ID, &win_sal, MPI_DOUBLE);
+    direct_sum_sal_lat_deriv(run_information, xcos, ycos, zcos, area, sshs, sals_lat_deriv);
+    direct_sum_sal_lat_deriv(run_information, xcos, ycos, zcos, area, sshs, sals_lon_deriv);
+    sync_updates<double>(sals_lat_deriv, P, ID, &win_lat, MPI_DOUBLE);
+    sync_updates<double>(sals_lon_deriv, P, ID, &win_lon, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   }
 
@@ -94,13 +100,14 @@ int main(int argc, char **argv) {
       command += filename;
       system(command.c_str());
       std::string outpath = run_information.out_path + "/" + output_folder + "/";
-      write_state(sals, outpath, "sals.csv");
+      write_state(sals_lat_deriv, outpath, "sals_lat_deriv.csv");
+      write_state(sals_lon_deriv, outpath, "sals_lon_deriv.csv");
       write_state(sshs, outpath, "sshs.csv");
       write_state(xcos, outpath, "x.csv");
       write_state(ycos, outpath, "y.csv");
       write_state(zcos, outpath, "z.csv");
       write_state(area, outpath, "areas.csv");
-    }  
+    }
   }
 
   MPI_Finalize();

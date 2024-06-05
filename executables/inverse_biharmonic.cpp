@@ -96,21 +96,23 @@ int main(int argc, char **argv) {
   if (ID == 0) {
     std::cout << "integration time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
 
-    std::string output_folder = create_config(run_information) + "_inverse_biharmonic";
-    std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;
-    std::string command = "python ";
-    command += filename;
-    system(command.c_str());
-    std::string outpath = run_information.out_path + "/" + output_folder + "/";
-    write_state(integrated, outpath, "output.csv");
-    write_state(potential, outpath, "potential.csv");
-    write_state(xcos_t, outpath, "x_t.csv");
-    write_state(ycos_t, outpath, "y_t.csv");
-    write_state(zcos_t, outpath, "z_t.csv");
-    write_state(xcos_s, outpath, "x_s.csv");
-    write_state(ycos_s, outpath, "y_s.csv");
-    write_state(zcos_s, outpath, "z_s.csv");
-    write_state(area, outpath, "areas.csv");
+    if (run_information.write_output) {
+      std::string output_folder = create_config(run_information) + "_inverse_biharmonic";
+      std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;
+      std::string command = "python ";
+      command += filename;
+      system(command.c_str());
+      std::string outpath = run_information.out_path + "/" + output_folder + "/";
+      write_state(integrated, outpath, "output.csv");
+      write_state(potential, outpath, "potential.csv");
+      write_state(xcos_t, outpath, "x_t.csv");
+      write_state(ycos_t, outpath, "y_t.csv");
+      write_state(zcos_t, outpath, "z_t.csv");
+      write_state(xcos_s, outpath, "x_s.csv");
+      write_state(ycos_s, outpath, "y_s.csv");
+      write_state(zcos_s, outpath, "z_s.csv");
+      write_state(area, outpath, "areas.csv");
+    }  
   }
 
   MPI_Finalize();
