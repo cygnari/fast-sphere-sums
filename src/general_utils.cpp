@@ -186,23 +186,32 @@ double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> 
 double sal_gf_interp_40(const double x) {
   // x is cos(theta) or dot product of two points
   // conjectured technique
-  double eps = 1e-8;
+  double eps = 1e-16;
   double mp = 2-2*x;
   double sqp = sqrt(mp+eps);
-  double part1 = 6.21196/sqp;
-  double part2 = (-2.7-6)*log(sqp+mp);
-  return part1+part2;
+  double part1 = (1-6.21196)/sqp;
+  double part2 = (2.7+6)*log(sqp+mp);
+  return -1.0*(part1+part2)*3.0*1035.0/(4.0*M_PI*5517.0);
 }
 
 double sal_gf_deriv_interp_40(const double x) {
   // x is cos(theta) or dot product of two points
-  double eps=1e-12;
+  double eps=1e-16;
   double mp = 2-2*x;
+  double x2 = x*x;
+  double sinp = sqrt(1-x2);
+  double cons = -3.0*1035.0/(4.0*M_PI*5517.0);
   double sqp = sqrt(mp);
   double cbp = sqp*mp;
-  double part1 = 6.21196/(cbp+eps);
-  double part2 = (-2.7-6)*(2*sqp+1)/(mp+cbp+eps);
-  return part1-part2;
+  double part1 = (1-6.21196)/(cbp+eps);
+  double part2 = (2.7+6)*(2*x+sqp) / (2*(x2-1)+eps);
+  return (part1+part2)*cons;
+  // double mp = 2-2*x;
+  // double sqp = sqrt(mp);
+  // double cbp = sqp*mp;
+  // double part1 = 6.21196/(cbp+eps);
+  // double part2 = (-2.7-6)*(2*sqp+1)/(mp+cbp+eps);
+  // return (part1-part2)*3.0*1035.0/(4.0*M_PI*5517.0);
 }
 
 double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3) {
@@ -213,7 +222,7 @@ double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const
   } else {
     double val = sal_gf_deriv_interp_40(x1*y1+x2*y2+x3*y3);
     double x32 = x3*x3;
-    double part1 = y3*(1-x32)-x3*(1.0-x3*y3);
+    double part1 = y3*(1-x32)-x3*(x1*y1+x2*y2);
     double part2 = sqrt(1-x32);
     return val*part1/part2;
     // double delta_theta=0.001;
