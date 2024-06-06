@@ -1,4 +1,4 @@
-use_fast=0
+use_fast=1
 use_ces=0
 theta=0.7
 degree=6
