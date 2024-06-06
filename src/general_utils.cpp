@@ -238,9 +238,9 @@ double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const
 }
 
 double sal_gf_lon_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3) {
-  if (abs(x3-1)<1e-15) {
+  if (std::abs(x3-1)<1e-15) {
     return 0;
-  } else if (abs(x3+1)<1e-15) {
+  } else if (std::abs(x3+1)<1e-15) {
     return 0;
   } else {
     double val = sal_gf_deriv_interp_40(x1*y1+x2*y2+x3*y3);
@@ -310,9 +310,9 @@ double dilog(const double x) {
 }
 
 int face_from_xyz(const double x, const double y, const double z) {
-  double ax = abs(x);
-  double ay = abs(y);
-  double az = abs(z);
+  double ax = std::abs(x);
+  double ay = std::abs(y);
+  double az = std::abs(z);
   if ((ax >= ay) and (ax >= az)) {
     if (x >= 0) {
       return 1;
@@ -457,9 +457,9 @@ std::vector<double> xieta_from_xyz_6(const double x, const double y, const doubl
 }
 
 std::vector<double> xieta_from_xyz(const double x, const double y, const double z) {
-  double ax = abs(x);
-  double ay = abs(y);
-  double az = abs(z);
+  double ax = std::abs(x);
+  double ay = std::abs(y);
+  double az = std::abs(z);
 
   if ((ax >= ay) and (ax >= az)) {
     if (x >= 0) {

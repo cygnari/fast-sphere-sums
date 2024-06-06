@@ -2,6 +2,7 @@
 #define H_STRUCTS_H
 
 #include <vector>
+#include <string>
 
 struct RunConfig {
   bool use_fast = false;
