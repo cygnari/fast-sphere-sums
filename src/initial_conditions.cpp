@@ -65,7 +65,7 @@ void balance_conditions(std::vector<double>& potential, const std::vector<double
   for (int i = 0; i < potential.size(); i++) {
     int_pot += potential[i] * area[i];
   }
-  if (abs(int_pot) > 1e-15) {
+  if (std::abs(int_pot) > 1e-15) {
     for (int i = 0; i < potential.size(); i++) {
       potential[i] -= int_pot / (4 * M_PI);
     }

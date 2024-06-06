@@ -215,9 +215,9 @@ double sal_gf_deriv_interp_40(const double x) {
 }
 
 double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3) {
-  if (abs(x3-1)<1e-15) {
+  if (std::abs(x3-1)<1e-15) {
     return 0;
-  } else if (abs(x3+1)<1e-15) {
+  } else if (std::abs(x3+1)<1e-15) {
     return 0;
   } else {
     double val = sal_gf_deriv_interp_40(x1*y1+x2*y2+x3*y3);

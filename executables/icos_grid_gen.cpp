@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <chrono>
 
 #include "fast-sphere-sums-config.h"
 #include "general_utils.hpp"

@@ -133,7 +133,7 @@ std::vector<std::vector<double>> interp_vals_bli(const double xi, const double e
   double denom_xi, val;
   std::vector<double> xi_func_vals (degree+1, 0);
   for (int i = 0; i < degree+1; i++) {
-    if (abs(xi-cheb_points_xi[i]) < 1e-16) {
+    if (std::abs(xi-cheb_points_xi[i]) < 1e-16) {
       found_xi_point = true;
       xi_func_vals[i] = 1;
     }
@@ -154,7 +154,7 @@ std::vector<std::vector<double>> interp_vals_bli(const double xi, const double e
   double denom_eta;
   std::vector<double> eta_func_vals (degree+1, 0);
   for (int i = 0; i < degree+1; i++) {
-    if (abs(eta-cheb_points_eta[i]) < 1e-16) {
+    if (std::abs(eta-cheb_points_eta[i]) < 1e-16) {
       found_eta_point = true;
       eta_func_vals[i] = 1;
     }

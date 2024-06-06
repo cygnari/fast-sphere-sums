@@ -2,6 +2,7 @@
 #include <mpi.h>
 #include <vector>
 #include <cmath>
+#include <chrono>
 
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
@@ -99,7 +100,7 @@ int main(int argc, char **argv) {
       write_state(ycos, outpath, "y.csv");
       write_state(zcos, outpath, "z.csv");
       write_state(area, outpath, "areas.csv");
-    }  
+    }
   }
 
   MPI_Finalize();
