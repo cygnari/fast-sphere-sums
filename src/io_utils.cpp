@@ -74,6 +74,8 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
       }
     } else if (word1 == "grid") {
       run_information.grid = word2;
+    } else if (word1 == "kernel_eps") {
+      run_information.kernel_eps = stod(word2);
     } else {
       run_information.interp_point_count = pow(run_information.interp_degree + 1, 2);
       if (run_information.fast_sum_cluster_thresh == -1) {
