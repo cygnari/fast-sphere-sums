@@ -191,7 +191,7 @@ double sal_gf_interp_40(const double x) {
   double sqp = sqrt(mp+eps);
   double part1 = (1-6.21196)/sqp;
   double part2 = (2.7+6)*log(sqp+mp);
-  return -1.0*(part1+part2)*3.0*1035.0/(4.0*M_PI*5517.0);
+  return -1.0*(part1+part2)*3.0*1035.0/(4.0*4.0*M_PI*5517.0);
 }
 
 double sal_gf_deriv_interp_40(const double x) {
@@ -200,18 +200,12 @@ double sal_gf_deriv_interp_40(const double x) {
   double mp = 2-2*x;
   double x2 = x*x;
   double sinp = sqrt(1-x2);
-  double cons = -3.0*1035.0/(4.0*M_PI*5517.0);
+  double cons = -3.0*1035.0/(3*6371000*4.0*M_PI*5517.0);
   double sqp = sqrt(mp);
   double cbp = sqp*mp;
   double part1 = (1-6.21196)/(cbp+eps);
   double part2 = (2.7+6)*(2*x+sqp) / (2*(x2-1)+eps);
   return (part1+part2)*cons;
-  // double mp = 2-2*x;
-  // double sqp = sqrt(mp);
-  // double cbp = sqp*mp;
-  // double part1 = 6.21196/(cbp+eps);
-  // double part2 = (-2.7-6)*(2*sqp+1)/(mp+cbp+eps);
-  // return (part1-part2)*3.0*1035.0/(4.0*M_PI*5517.0);
 }
 
 double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const double y1, const double y2, const double y3) {
@@ -225,15 +219,6 @@ double sal_gf_lat_deriv(const double x1, const double x2, const double x3, const
     double part1 = y3*(1-x32)-x3*(x1*y1+x2*y2);
     double part2 = sqrt(1-x32);
     return val*part1/part2;
-    // double delta_theta=0.001;
-    // std::vector<double> ll = xyz_to_latlon(x1, x2, x3);
-    // double lat = ll[0], lon=ll[1];
-    // double lat1=lat+delta_theta, lat2=lat-delta_theta;
-    // std::vector<double> xyz = latlon_to_xyz(lat1, lon, 1.0);
-    // double val1 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
-    // xyz = latlon_to_xyz(lat2, lon, 1.0);
-    // double val2 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
-    // return (val1-val2)/(2*delta_theta);
   }
 }
 
@@ -247,15 +232,6 @@ double sal_gf_lon_deriv(const double x1, const double x2, const double x3, const
     double part1 = x1*y2-x2*y1;
     double part2 = sqrt(1-x3*x3);
     return val*part1/part2;
-    // double delta_theta=0.001;
-    // std::vector<double> ll = xyz_to_latlon(x1, x2, x3);
-    // double lat = ll[0], lon=ll[1];
-    // double lon1=lon+delta_theta, lon2=lon-delta_theta;
-    // std::vector<double> xyz = latlon_to_xyz(lat, lon1, 1.0);
-    // double val1 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
-    // xyz = latlon_to_xyz(lat, lon2, 1.0);
-    // double val2 = sal_gf_interp_40(xyz[0]*y1+xyz[1]*y2+xyz[2]*y3);
-    // return (val1-val2)/(2*delta_theta);
   }
 }
 
