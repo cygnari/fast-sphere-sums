@@ -285,6 +285,88 @@ double dilog(const double x) {
   return r + s*y*p/q;
 }
 
+double erf1(const double x) {
+  // Erf approximation
+  // constants
+  double a1 =  0.254829592;
+  double a2 = -0.284496736;
+  double a3 =  1.421413741;
+  double a4 = -1.453152027;
+  double a5 =  1.061405429;
+  double p  =  0.3275911;
+
+  if (x == 0) {
+    return 0;
+  } else {
+    // Save the sign of x
+    int sign = 1;
+    if (x < 0) sign = -1;
+    double ax = std::abs(x);
+
+    // A&S formula 7.1.26
+    double t = 1.0/(1.0 + p*ax);
+    double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
+
+    return sign*y;
+  }
+}
+
+double erf2(const double x) {
+  // alternate Erf approximation
+  /*
+  Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+  *
+  * Developed at SunPro, a Sun Microsystems, Inc. business.
+  * Permission to use, copy, modify, and distribute this
+  * software is freely granted, provided that this notice
+  * is preserved.
+  */
+  double erx = 8.45062911510467529297e-01;
+  double efx = 1.28379167095512586316e-01;
+  double efx8= 1.02703333676410069053e+00;
+  double pp0 = 1.28379167095512558561e-01;
+  double pp1 = -3.25042107247001499370e-01;
+  double pp2 = -2.84817495755985104766e-02;
+  double pp3 = -5.77027029648944159157e-03;
+  double pp4 = -2.37630166566501626084e-05;
+  double qq1 = 3.97917223959155352819e-01;
+  double qq2 = 6.50222499887672944485e-02;
+  double qq3 = 5.08130628187576562776e-03;
+  double qq4 = 1.32494738004321644526e-04;
+  double qq5 = -3.96022827877536812320e-06;
+
+  double pa0 = -2.36211856075265944077e-03;
+  double pa1 = 4.14856118683748331666e-01;
+  double pa2 = -3.72207876035701323847e-01;
+  double pa3 = 3.18346619901161753674e-01;
+  double pa4 = -1.10894694282396677476e-01;
+  double pa5 = 3.54783043256182359371e-02;
+  double pa6 = -2.16637559486879084300e-03;
+  double qa1 = 1.06420880400844228286e-01;
+  double qa2 = 5.40397917702171048937e-01;
+  double qa3 = 7.18286544141962662868e-02;
+  double qa4 = 1.26171219808761642112e-01;
+  double qa5 = 1.36370839120290507362e-02;
+  double qa6 = 1.19844998467991074170e-02;
+
+  double ax = std::abs(x);
+  double z, r, s, y, P, Q;
+  if (x == 0) {
+    return 0;
+  } else if (ax < 0.84375) {
+    z = x*x;
+    r = pp0+z*(pp1+z*(pp2+z*(pp3+z*pp4)));
+    s = 1.0+z*(qq1+z*(qq2+z*(qq3+z*(qq4+z*qq5))));
+    y = r/s;
+    return x + x*y;
+  } else {
+    s = ax-1.0;
+    P = pa0+s*(pa1+s*(pa2+s*(pa3+s*(pa4+s*(pa5+s*pa6)))));
+    Q = 1.0+s*(qa1+s*(qa2+s*(qa3+s*(qa4+s*(qa5+s*qa6)))));
+    return std::copysign(erx+P/Q,x);
+  }
+}
+
 int face_from_xyz(const double x, const double y, const double z) {
   double ax = std::abs(x);
   double ay = std::abs(y);

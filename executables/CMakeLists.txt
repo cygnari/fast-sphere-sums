@@ -12,6 +12,13 @@ target_include_directories(inverse_laplacian_reg PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>)
 
+add_executable(laplacian laplacian.cpp)
+target_link_libraries(laplacian PUBLIC FastSphereSums)
+target_include_directories(laplacian PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
 add_executable(inverse_biharmonic inverse_biharmonic.cpp)
 target_link_libraries(inverse_biharmonic PUBLIC FastSphereSums)
 target_include_directories(inverse_biharmonic PUBLIC

@@ -38,6 +38,25 @@ void direct_sum_invert_laplacian_reg(const RunConfig& run_information, const std
   }
 }
 
+void direct_sum_laplacian(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+  // perform direct summation to convolve to invert the laplacian
+  double tx, ty, tz, sx, sy, sz;
+  double eps=run_information.kernel_eps;
+  double h1, h2, gamm, gamm2, gamm4;
+  for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
+    tx = xcos[i], ty = ycos[i], tz = zcos[i];
+    for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
+      sx = xcos[j], sy = ycos[j], sz = zcos[j];
+      gamm = tx * sx + ty * sy + tz * sz;
+      gamm2 = gamm * gamm;
+      gamm4 = gamm2 * gamm2;
+      h1 = exp(-1/eps)*pow(M_PI,-1.5)*(2*gamm*(-1.0+3*eps+gamm2));
+      h2 = exp((gamm2-1)/eps)/(sqrt(eps)*M_PI)*(2*eps*eps+2*gamm2*(gamm2-1)+eps*(7*gamm2-1))*(1+std::erf(gamm/eps));
+      integral[i] += (h1+h2)/pow(eps,2.5) * (potential[i]-potential[j]) * area[j];
+    }
+  }
+}
+
 void direct_sum_inverse_biharmonic(const RunConfig& run_information, const std::vector<double>& xcos_t, const std::vector<double>& ycos_t, const std::vector<double>& zcos_t,
                                   const std::vector<double>& xcos_s, const std::vector<double>& ycos_s, const std::vector<double>& zcos_s,
                                   const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {

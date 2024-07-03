@@ -42,6 +42,10 @@ double sal_gf_lon_deriv(const double x1, const double x2, const double x3, const
 
 double dilog(const double x);
 
+double erf1(const double x);
+
+double erf2(const double x);
+
 int face_from_xyz(const double x, const double y, const double z);
 
 std::vector<double> xyz_from_xieta(const double xi, const double eta, const int face);
