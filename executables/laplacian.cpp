@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
       std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
     }
     begin = std::chrono::steady_clock::now();
-    fast_sum_inverse_laplacian(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
+    fast_sum_laplacian(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
     sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   } else {

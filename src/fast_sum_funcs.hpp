@@ -14,6 +14,10 @@ void fast_sum_inverse_biharmonic(const RunConfig& run_information, const std::ve
                                         const std::vector<double>& xcos_s, const std::vector<double>& ycos_s, const std::vector<double>& zcos_s,
                                         const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral);
 
+void fast_sum_laplacian(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels,
+                                        const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
+                                        const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral);
+
 void fast_sum_sal(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels,
                                         const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                                         const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral);

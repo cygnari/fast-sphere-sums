@@ -42,17 +42,53 @@ void direct_sum_laplacian(const RunConfig& run_information, const std::vector<do
   // perform direct summation to convolve to invert the laplacian
   double tx, ty, tz, sx, sy, sz;
   double eps=run_information.kernel_eps;
-  double h1, h2, gamm, gamm2, gamm4;
+  double h1, h2, gamm, gamm2, gamm4, gamm6, g2m1;
+  double eps2, epss, eps3, eps4;
   for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
     tx = xcos[i], ty = ycos[i], tz = zcos[i];
     for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
       sx = xcos[j], sy = ycos[j], sz = zcos[j];
       gamm = tx * sx + ty * sy + tz * sz;
-      gamm2 = gamm * gamm;
-      gamm4 = gamm2 * gamm2;
-      h1 = exp(-1/eps)*pow(M_PI,-1.5)*(2*gamm*(-1.0+3*eps+gamm2));
-      h2 = exp((gamm2-1)/eps)/(sqrt(eps)*M_PI)*(2*eps*eps+2*gamm2*(gamm2-1)+eps*(7*gamm2-1))*(1+std::erf(gamm/eps));
-      integral[i] += (h1+h2)/pow(eps,2.5) * (potential[i]-potential[j]) * area[j];
+      // 4/eps in H_{4,eps} integral
+      if (gamm > 1.0 - 30*eps) {
+        gamm2 = gamm * gamm;
+        gamm4 = gamm2 * gamm2;
+        h1 = exp(-1/eps)*pow(M_PI,-1.5)*(2*gamm*(-1.0+3*eps+gamm2));
+        h2 = exp((gamm2-1)/eps)/(sqrt(eps)*M_PI)*(2*eps*eps+2*gamm2*(gamm2-1)+eps*(7*gamm2-1))*(1+std::erf(gamm/sqrt(eps)));
+        integral[i] += (h1+h2)/pow(eps,2.5) * (potential[i]-potential[j]) * area[j];
+      }
+      // H_{2,eps}
+      // if (gamm > 1.0 - 30*eps) {
+      //   gamm2 = gamm * gamm;
+      //   eps2 = sqrt(eps);
+      //   h1 = exp(-1/eps)*pow(M_PI,-1.5)*(2*gamm*eps);
+      //   h2 = exp((gamm2-1)/eps)/M_PI*eps2*(eps+2*gamm2)*(1+std::erf(gamm/eps2));
+      //   integral[i] += (h1+h2)/pow(eps,2.5) * (potential[i]-potential[j]) * area[j];
+      // }
+      // H_{6,eps}
+      // if (gamm > 1.0-30*eps) {
+      //   gamm2 = gamm*gamm;
+      //   gamm4 = gamm2*gamm2;
+      //   gamm6 = gamm4*gamm2;
+      //   epss = sqrt(eps);
+      //   eps2 = eps*eps;
+      //   h1 = exp(-1.0/eps)*gamm*(23*eps2+16*eps*(gamm2-1)+2*(gamm2-1)*(gamm2-1))/(2*eps*pow(M_PI,1.5));
+      //   h2 = exp((gamm2-1)/eps)/(2*epss*eps2*M_PI)*(eps*(1-6*eps+6*eps2)+2*gamm2*(1-9*eps+15*eps2)+gamm4*(17*eps-4)+gamm6*2)*(1+std::erf(gamm/epss));
+      //   integral[i] += (h1+h2)/pow(eps,1.5) * (potential[i]-potential[j]) * area[j];
+      // }
+      // H_{8,eps}
+      // if (gamm > 1.0-30*eps) {
+      //   gamm2 = gamm*gamm;
+      //   g2m1 = gamm2-1;
+      //   gamm4 = gamm2*gamm2;
+      //   eps2 = eps*eps;
+      //   eps4 = eps2*eps2;
+      //   eps3 = eps*eps2;
+      //   epss = sqrt(eps);
+      //   h1 = exp(-1.0/eps)*gamm*(219*eps3+60*eps*g2m1*g2m1+4*g2m1*g2m1*g2m1+eps2*(236*gamm2-234))/(12*eps2*pow(M_PI,1.5));
+      //   h2 = exp(g2m1/eps)/(6*eps2*epss*M_PI)*(24*eps4+2*gamm2*pow(g2m1,3)+12*eps3*(13*gamm2-3)+eps*g2m1*g2m1*(31*gamm2-1)+12*eps2*(1-12*gamm2+11*gamm4))*(1+std::erf(gamm/epss));
+      //   integral[i] += (h1+h2)/eps*(potential[i]-potential[j])*area[j];
+      // }
     }
   }
 }

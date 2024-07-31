@@ -2,6 +2,7 @@ add_library(FastSphereSums
     direct_sum_funcs.cpp
     ./fast_sum_interactions/inverse_laplacian_interactions.cpp
     ./fast_sum_interactions/inverse_biharmonic_interactions.cpp
+    ./fast_sum_interactions/laplacian_interactions.cpp
     ./fast_sum_interactions/sal_interactions.cpp
     ./fast_sum_interactions/sal_interactions_lat_deriv.cpp
     ./fast_sum_interactions/sal_interactions_lon_deriv.cpp
@@ -25,6 +26,7 @@ install(FILES
     direct_sum_funcs.hpp
     ./fast_sum_interactions/inverse_laplacian_interactions.hpp
     ./fast_sum_interactions/inverse_biharmonic_interactions.hpp
+    ./fast_sum_interactions/laplacian_interactions.hpp
     ./fast_sum_interactions/sal_interactions.hpp
     ./fast_sum_interactions/sal_interactions_lat_deriv.hpp
     ./fast_sum_interactions/sal_interactions_lon_deriv.hpp
