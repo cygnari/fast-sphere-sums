@@ -43,6 +43,12 @@ void test_func_one(const std::vector<double>& xcos, const std::vector<double>& y
   }
 }
 
+void x_cubed(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  for (int i = 0; i < potential.size(); i++) {
+    potential[i] = pow(xcos[i], 3);
+  }
+}
+
 void initialize_condition(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
   // initial condition
   if (run_information.initial_condition == "SH43") {
@@ -56,6 +62,8 @@ void initialize_condition(const RunConfig& run_information, const std::vector<do
     z_co(xcos, ycos, zcos, potential);
   } else if (run_information.initial_condition == "tf1") {
     test_func_one(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "x3") {
+    x_cubed(xcos, ycos, zcos, potential);
   }
 }
 
