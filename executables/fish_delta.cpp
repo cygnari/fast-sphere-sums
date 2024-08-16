@@ -79,8 +79,7 @@ int main(int argc, char **argv) {
     // direct summation
     bounds_determine_2d(run_information, P, ID);
     begin = std::chrono::steady_clock::now();
-    direct_sum_laplacian_pse(run_information, xcos, ycos, zcos, area, potential, integrated);
-    // direct_sum_laplacian_fish(run_information, xcos, ycos, zcos, area, potential, integrated);
+    direct_sum_dirac_delta_fish(run_information, xcos, ycos, zcos, area, potential, integrated);
     sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   }
@@ -89,7 +88,7 @@ int main(int argc, char **argv) {
     std::cout << "integration time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
 
     if (run_information.write_output) {
-      std::string output_folder = create_config(run_information) + "_lap";
+      std::string output_folder = create_config(run_information) + "_fish_delta";
       std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;
       std::string command = "python ";
       command += filename;

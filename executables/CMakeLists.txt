@@ -1,3 +1,17 @@
+add_executable(fish_delta fish_delta.cpp)
+target_link_libraries(fish_delta PUBLIC FastSphereSums)
+target_include_directories(fish_delta PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
+add_executable(gradient gradient.cpp)
+target_link_libraries(gradient PUBLIC FastSphereSums)
+target_include_directories(fish_delta PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
 add_executable(inverse_laplacian inverse_laplacian.cpp)
 target_link_libraries(inverse_laplacian PUBLIC FastSphereSums)
 target_include_directories(inverse_laplacian PUBLIC

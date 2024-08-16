@@ -38,7 +38,101 @@ void direct_sum_invert_laplacian_reg(const RunConfig& run_information, const std
   }
 }
 
-void direct_sum_laplacian(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+void direct_sum_dirac_delta_fish(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+  // perform direct summation to convolve to invert the laplacian
+  double tx, ty, tz, sx, sy, sz;
+  double eps=run_information.kernel_eps;
+  double gamma, denom, part;
+  // for (int i = 0; i < xcos.size(); i++) { // loop over targets
+  for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
+    tx = xcos[i], ty = ycos[i], tz = zcos[i];
+    // for (int j = 0; j < xcos.size(); j++) { // loop over sources
+    for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
+      sx = xcos[j], sy = ycos[j], sz = zcos[j];
+      gamma = tx*sx+ty*sy+tz*sz;
+      denom = 1+eps-gamma;
+      part = 1-gamma;
+      // integral[i] += ((2*eps+part*part)/(4*M_PI*denom*denom)+part/(M_PI*denom))*potential[j]*area[j]; // cartesian derivatives
+      integral[i] += -(part*part-2*eps*gamma)/(4*M_PI*denom*denom)*potential[j]*area[j];
+    }
+  }
+}
+
+void direct_sum_laplacian_fish(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
+  // perform direct summation to convolve to invert the laplacian
+  double tx, ty, tz, sx, sy, sz;
+  double eps=run_information.kernel_eps;
+  double gamma, denom, part;
+  // for (int i = 0; i < xcos.size(); i++) { // loop over targets
+  for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
+    tx = xcos[i], ty = ycos[i], tz = zcos[i];
+    // for (int j = 0; j < xcos.size(); j++) { // loop over sources
+    for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
+      sx = xcos[j], sy = ycos[j], sz = zcos[j];
+      gamma = tx*sx+ty*sy+tz*sz;
+      denom = 1+eps-gamma;
+      part = 1+gamma;
+      integral[i] += -eps*(2+eps)*(-4-2*eps*gamma+part*part)/(2*M_PI*denom*denom*denom*denom)*potential[j]*area[j];
+    }
+  }
+}
+
+void direct_sum_gradient_x_pse(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral_1, std::vector<double>& integral_2, std::vector<double>& integral_3) {
+  // perform direct summation to convolve to invert the laplacian
+  double tx, ty, tz, sx, sy, sz;
+  double eps=run_information.kernel_eps;
+  double h1, h2, gamm, gamm2, gamm4, gamm6, g2m1;
+  double eps2, epss, eps3, eps4;
+  double piece1, piece2, coeff1, coeff2, coeff3, coeff4;
+  for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
+    tx = xcos[i], ty = ycos[i], tz = zcos[i];
+    for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
+      sx = xcos[j], sy = ycos[j], sz = zcos[j];
+      gamm = tx * sx + ty * sy + tz * sz;
+      gamm2 = gamm*gamm;
+      gamm4=gamm2*gamm2;
+      eps2=eps*eps;
+      // fourth order kernel
+      piece1 = (2-6*eps-2*gamm2)*gamm;
+      piece2 = 3*eps2-2*eps-2*gamm2+8*eps*gamm2+2*gamm4;
+      coeff1 = 2*exp(1/eps)*pow(M_PI,1.5);
+      coeff2 = exp((gamm2-1)/eps)/(2*sqrt(eps)*M_PI);
+      coeff3 = 1+std::erf(gamm/sqrt(eps));
+      // coeff4 = 1.0/pow(eps,2.5)*(potential[i]-potential[j])*area[j];
+      coeff4 = -1.0/pow(eps,2.5)*potential[j]*area[j];
+      h1 = (tx*piece1+sx*piece2)/coeff1;
+      h2 = coeff2*(2*eps2*(tx-3*gamm*sx)+2*gamm2*(gamm2-1)*(tx-gamm*sx)+(7*gamm2-1)*tx*eps+3*gamm*sx*eps*(1-3*gamm2))*coeff3;
+      integral_1[i] += (h1+h2)*coeff4;
+      h1 = (ty*piece1+sy*piece2)/coeff1;
+      h2 = coeff2*(2*eps2*(ty-3*gamm*sy)+2*gamm2*(gamm2-1)*(ty-gamm*sy)+(7*gamm2-1)*ty*eps+3*gamm*sy*eps*(1-3*gamm2))*coeff3;
+      integral_2[i] += (h1+h2)*coeff4;
+      h1 = (tz*piece1+sz*piece2)/coeff1;
+      h2 = coeff2*(2*eps2*(tz-3*gamm*sz)+2*gamm2*(gamm2-1)*(tz-gamm*sz)+(7*gamm2-1)*tz*eps+3*gamm*sz*eps*(1-3*gamm2))*coeff3;
+      integral_3[i] += (h1+h2)*coeff4;
+      // sixth order kernel
+      // eps3 = eps2*eps;
+      // gamm6 = gamm4*gamm2;
+      // g2m1 = gamm2 - 1;
+      // piece1 = 4*gamm*(gamm2-1-11*eps)*(gamm2-1+eps);
+      // piece2 = 4*eps+52*eps2+33*eps3+2*gamm2*(2+16*eps-47*eps2)-4*gamm4*(2+9*eps)+4*gamm6;
+      // coeff1 = 8*eps*exp(1/eps)*pow(M_PI,1.5);
+      // coeff2 = exp((gamm2-1)/eps)/(8*pow(eps,1.5)*M_PI);
+      // coeff3 = 1+std::erf(gamm/sqrt(eps));
+      // coeff4 = -1.0/pow(eps,2.5)*potential[j]*area[j];
+      // h1 = (tx*piece1-sx*piece2)/coeff1;
+      // h2 = coeff2*coeff3*(3*eps3*(tx-3*gamm*sx)+4*gamm2*g2m1*g2m1*(tx-gamm*sx)-2*eps*g2m1*(tx-3*gamm*sx+gamm2*(19*tx-17*gamm*sx))+6*eps2*(4*tx-12*gamm*sx+gamm2*(11*tx+19*gamm*sx)));
+      // integral_1[i] += (h1+h2)*coeff4;
+      // h1 = (ty*piece1-sy*piece2)/coeff1;
+      // h2 = coeff2*coeff3*(3*eps3*(ty-3*gamm*sy)+4*gamm2*g2m1*g2m1*(ty-gamm*sy)-2*eps*g2m1*(ty-3*gamm*sy+gamm2*(19*ty-17*gamm*sy))+6*eps2*(4*ty-12*gamm*sy+gamm2*(11*ty+19*gamm*sy)));
+      // integral_2[i] += (h1+h2)*coeff4;
+      // h1 = (tz*piece1-sz*piece2)/coeff1;
+      // h2 = coeff2*coeff3*(3*eps3*(tz-3*gamm*sz)+4*gamm2*g2m1*g2m1*(tz-gamm*sz)-2*eps*g2m1*(tz-3*gamm*sz+gamm2*(19*tz-17*gamm*sz))+6*eps2*(4*tz-12*gamm*sz+gamm2*(11*tz+19*gamm*sz)));
+      // integral_3[i] += (h1+h2)*coeff4;
+    }
+  }
+}
+
+void direct_sum_laplacian_pse(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // perform direct summation to convolve to invert the laplacian
   double tx, ty, tz, sx, sy, sz;
   double eps=run_information.kernel_eps;

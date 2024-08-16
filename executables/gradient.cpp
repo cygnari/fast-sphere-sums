@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
   MPI_Status status;
   MPI_Comm_size(MPI_COMM_WORLD, &P);
   MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-  MPI_Win win_integrated;
+  MPI_Win win_integrated1, win_integrated2, win_integrated3;
 
   MPI_Datatype dt_interaction;
   MPI_Type_contiguous(3, MPI_INT, &dt_interaction);
@@ -39,9 +39,13 @@ int main(int argc, char **argv) {
   std::vector<double> zcos (run_information.point_count, 0);
   std::vector<double> area (run_information.point_count, 0);
   std::vector<double> potential (run_information.point_count, 0);
-  std::vector<double> integrated (run_information.point_count, 0);
+  std::vector<double> integrated_1 (run_information.point_count, 0);
+  std::vector<double> integrated_2 (run_information.point_count, 0);
+  std::vector<double> integrated_3 (run_information.point_count, 0);
 
-  MPI_Win_create(&integrated[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_integrated);
+  MPI_Win_create(&integrated_1[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_integrated1);
+  MPI_Win_create(&integrated_2[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_integrated2);
+  MPI_Win_create(&integrated_3[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_integrated3);
 
   std::string data_pre = DATA_DIR + std::to_string(run_information.point_count) + "_" + run_information.grid + "_";
 
@@ -79,9 +83,11 @@ int main(int argc, char **argv) {
     // direct summation
     bounds_determine_2d(run_information, P, ID);
     begin = std::chrono::steady_clock::now();
-    direct_sum_laplacian_pse(run_information, xcos, ycos, zcos, area, potential, integrated);
+    direct_sum_gradient_x_pse(run_information, xcos, ycos, zcos, area, potential, integrated_1, integrated_2, integrated_3);
     // direct_sum_laplacian_fish(run_information, xcos, ycos, zcos, area, potential, integrated);
-    sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
+    sync_updates<double>(integrated_1, P, ID, &win_integrated1, MPI_DOUBLE);
+    sync_updates<double>(integrated_2, P, ID, &win_integrated2, MPI_DOUBLE);
+    sync_updates<double>(integrated_3, P, ID, &win_integrated3, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   }
 
@@ -89,13 +95,15 @@ int main(int argc, char **argv) {
     std::cout << "integration time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
 
     if (run_information.write_output) {
-      std::string output_folder = create_config(run_information) + "_lap";
+      std::string output_folder = create_config(run_information) + "_grad";
       std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;
       std::string command = "python ";
       command += filename;
       system(command.c_str());
       std::string outpath = run_information.out_path + "/" + output_folder + "/";
-      write_state(integrated, outpath, "output.csv");
+      write_state(integrated_1, outpath, "output_1.csv");
+      write_state(integrated_2, outpath, "output_2.csv");
+      write_state(integrated_3, outpath, "output_3.csv");
       write_state(potential, outpath, "potential.csv");
       write_state(xcos, outpath, "x.csv");
       write_state(ycos, outpath, "y.csv");
