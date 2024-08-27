@@ -89,45 +89,44 @@ void direct_sum_gradient_x_pse(const RunConfig& run_information, const std::vect
     for (int j = run_information.two_d_two_lb; j < run_information.two_d_two_ub; j++) {
       sx = xcos[j], sy = ycos[j], sz = zcos[j];
       gamm = tx * sx + ty * sy + tz * sz;
-      gamm2 = gamm*gamm;
-      gamm4=gamm2*gamm2;
-      eps2=eps*eps;
-      // fourth order kernel
-      piece1 = (2-6*eps-2*gamm2)*gamm;
-      piece2 = 3*eps2-2*eps-2*gamm2+8*eps*gamm2+2*gamm4;
-      coeff1 = 2*exp(1/eps)*pow(M_PI,1.5);
-      coeff2 = exp((gamm2-1)/eps)/(2*sqrt(eps)*M_PI);
-      coeff3 = 1+std::erf(gamm/sqrt(eps));
-      // coeff4 = 1.0/pow(eps,2.5)*(potential[i]-potential[j])*area[j];
-      coeff4 = -1.0/pow(eps,2.5)*potential[j]*area[j];
-      h1 = (tx*piece1+sx*piece2)/coeff1;
-      h2 = coeff2*(2*eps2*(tx-3*gamm*sx)+2*gamm2*(gamm2-1)*(tx-gamm*sx)+(7*gamm2-1)*tx*eps+3*gamm*sx*eps*(1-3*gamm2))*coeff3;
-      integral_1[i] += (h1+h2)*coeff4;
-      h1 = (ty*piece1+sy*piece2)/coeff1;
-      h2 = coeff2*(2*eps2*(ty-3*gamm*sy)+2*gamm2*(gamm2-1)*(ty-gamm*sy)+(7*gamm2-1)*ty*eps+3*gamm*sy*eps*(1-3*gamm2))*coeff3;
-      integral_2[i] += (h1+h2)*coeff4;
-      h1 = (tz*piece1+sz*piece2)/coeff1;
-      h2 = coeff2*(2*eps2*(tz-3*gamm*sz)+2*gamm2*(gamm2-1)*(tz-gamm*sz)+(7*gamm2-1)*tz*eps+3*gamm*sz*eps*(1-3*gamm2))*coeff3;
-      integral_3[i] += (h1+h2)*coeff4;
-      // sixth order kernel
-      // eps3 = eps2*eps;
-      // gamm6 = gamm4*gamm2;
-      // g2m1 = gamm2 - 1;
-      // piece1 = 4*gamm*(gamm2-1-11*eps)*(gamm2-1+eps);
-      // piece2 = 4*eps+52*eps2+33*eps3+2*gamm2*(2+16*eps-47*eps2)-4*gamm4*(2+9*eps)+4*gamm6;
-      // coeff1 = 8*eps*exp(1/eps)*pow(M_PI,1.5);
-      // coeff2 = exp((gamm2-1)/eps)/(8*pow(eps,1.5)*M_PI);
-      // coeff3 = 1+std::erf(gamm/sqrt(eps));
-      // coeff4 = -1.0/pow(eps,2.5)*potential[j]*area[j];
-      // h1 = (tx*piece1-sx*piece2)/coeff1;
-      // h2 = coeff2*coeff3*(3*eps3*(tx-3*gamm*sx)+4*gamm2*g2m1*g2m1*(tx-gamm*sx)-2*eps*g2m1*(tx-3*gamm*sx+gamm2*(19*tx-17*gamm*sx))+6*eps2*(4*tx-12*gamm*sx+gamm2*(11*tx+19*gamm*sx)));
-      // integral_1[i] += (h1+h2)*coeff4;
-      // h1 = (ty*piece1-sy*piece2)/coeff1;
-      // h2 = coeff2*coeff3*(3*eps3*(ty-3*gamm*sy)+4*gamm2*g2m1*g2m1*(ty-gamm*sy)-2*eps*g2m1*(ty-3*gamm*sy+gamm2*(19*ty-17*gamm*sy))+6*eps2*(4*ty-12*gamm*sy+gamm2*(11*ty+19*gamm*sy)));
-      // integral_2[i] += (h1+h2)*coeff4;
-      // h1 = (tz*piece1-sz*piece2)/coeff1;
-      // h2 = coeff2*coeff3*(3*eps3*(tz-3*gamm*sz)+4*gamm2*g2m1*g2m1*(tz-gamm*sz)-2*eps*g2m1*(tz-3*gamm*sz+gamm2*(19*tz-17*gamm*sz))+6*eps2*(4*tz-12*gamm*sz+gamm2*(11*tz+19*gamm*sz)));
-      // integral_3[i] += (h1+h2)*coeff4;
+      if (gamm > 1.0-30*eps) {
+        gamm2 = gamm*gamm;
+        gamm4=gamm2*gamm2;
+        eps2=eps*eps;
+        // fourth order kernel
+        // piece1 = (2-6*eps-2*gamm2)*gamm;
+        // piece2 = 3*eps2-2*eps-2*gamm2+8*eps*gamm2+2*gamm4;
+        // coeff1 = 2*exp(1/eps)*pow(M_PI,1.5);
+        // coeff2 = exp((gamm2-1)/eps)/(2*sqrt(eps)*M_PI);
+        // coeff3 = 1+std::erf(gamm/sqrt(eps));
+        // // coeff4 = 1.0/pow(eps,2.5)*(potential[i]-potential[j])*area[j];
+        // coeff4 = -1.0/pow(eps,2.5)*potential[j]*area[j];
+        // h1 = (tx*piece1+sx*piece2)/coeff1;
+        // h2 = coeff2*(2*eps2*(tx-3*gamm*sx)+2*gamm2*(gamm2-1)*(tx-gamm*sx)+(7*gamm2-1)*tx*eps+3*gamm*sx*eps*(1-3*gamm2))*coeff3;
+        // integral_1[i] += (h1+h2)*coeff4;
+        // h1 = (ty*piece1+sy*piece2)/coeff1;
+        // h2 = coeff2*(2*eps2*(ty-3*gamm*sy)+2*gamm2*(gamm2-1)*(ty-gamm*sy)+(7*gamm2-1)*ty*eps+3*gamm*sy*eps*(1-3*gamm2))*coeff3;
+        // integral_2[i] += (h1+h2)*coeff4;
+        // h1 = (tz*piece1+sz*piece2)/coeff1;
+        // h2 = coeff2*(2*eps2*(tz-3*gamm*sz)+2*gamm2*(gamm2-1)*(tz-gamm*sz)+(7*gamm2-1)*tz*eps+3*gamm*sz*eps*(1-3*gamm2))*coeff3;
+        // integral_3[i] += (h1+h2)*coeff4;
+        // second order kernel
+        piece2 = eps*(eps+gamm2);
+        piece1 = -eps*gamm;
+        coeff1 = exp(1/eps)*pow(M_PI,1.5);
+        coeff2 = -exp((gamm2-1)/eps)*sqrt(eps)/(2*M_PI);
+        coeff3 = 1+std::erf(gamm/sqrt(eps));
+        coeff4 = 1.0/pow(eps,2.5)*potential[j]*area[j];
+        h1 = (tx*piece1+sx*piece2)/coeff1;
+        h2 = coeff2*coeff3*(eps*(tx-3*gamm*sx)+2*gamm2*(tx-gamm*sx));
+        integral_1[i] += (h1+h2)*coeff4;
+        h1 = (ty*piece1+sy*piece2)/coeff1;
+        h2 = coeff2*coeff3*(eps*(ty-3*gamm*sy)+2*gamm2*(ty-gamm*sy));
+        integral_2[i] += (h1+h2)*coeff4;
+        h1 = (tz*piece1+sz*piece2)/coeff1;
+        h2 = coeff2*coeff3*(eps*(tz-3*gamm*sz)+2*gamm2*(tz-gamm*sz));
+        integral_3[i] += (h1+h2)*coeff4;
+      }    
     }
   }
 }
