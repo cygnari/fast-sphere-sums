@@ -42,10 +42,6 @@ double sal_gf_lon_deriv(const double x1, const double x2, const double x3, const
 
 double dilog(const double x);
 
-double erf1(const double x);
-
-double erf2(const double x);
-
 int face_from_xyz(const double x, const double y, const double z);
 
 std::vector<double> xyz_from_xieta(const double xi, const double eta, const int face);
@@ -53,23 +49,5 @@ std::vector<double> xyz_from_xieta(const double xi, const double eta, const int 
 std::vector<double> xieta_from_xyz(const double x, const double y, const double z);
 
 std::vector<double> xieta_from_xyz(const double x, const double y, const double z, const int face);
-
-// std::vector<double> cube_to_sphere(const double x, const double y, const double z);
-//
-// std::vector<double> cube_to_sphere(const std::vector<double>& cube_point);
-//
-// std::vector<double> sphere_to_cube(const double x, const double y, const double z);
-//
-// std::vector<double> sphere_to_cube(const std::vector<double>& sphere_point);
-//
-// std::vector<double> cube_non_one (const double x, const double y, const double z);
-//
-// std::vector<double> cube_non_one(const std::vector<double>& cube_point);
-//
-// bool check_in_cube_square(const double x, const double y, const double z, const CubePanel& cube_panel);
-//
-// bool check_in_cube_square(const std::vector<double> point, const CubePanel& cube_panel);
-//
-// bool check_in_cube_square(const double x, const double y, const double z, const double min_side_1, const double max_side_1, const double min_side_2, const double max_side_2);
 
 #endif

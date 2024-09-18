@@ -63,7 +63,14 @@ target_include_directories(icos_grid_gen PUBLIC
 
 add_executable(icos_grid_gen_centroid icos_grid_gen_centroid.cpp)
 target_link_libraries(icos_grid_gen_centroid PUBLIC FastSphereSums)
-target_include_directories(icos_grid_gen PUBLIC
+target_include_directories(icos_grid_gen_centroid PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
+add_executable(cube_sphere_grid_gen cube_sphere_grid_gen.cpp)
+target_link_libraries(cube_sphere_grid_gen PUBLIC FastSphereSums)
+target_include_directories(cube_sphere_grid_gen PUBLIC
   $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>)
