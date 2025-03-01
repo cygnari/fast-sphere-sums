@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     } else {
       fast_sum_inverse_laplacian(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
     }
-    // sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
+    sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   } else {
     // direct summation

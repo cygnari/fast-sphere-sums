@@ -10,53 +10,38 @@
 
 void assign_points_to_source_leafs(const RunConfig& run_information, const std::vector<CubePanel>& source_tree, const std::vector<double>& xcos, 
 				 const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<int>& point_source_leaf) {
-	int level, lb, ub, new_lb, new_ub;
+	int lb, ub, new_lb, new_ub;
 	bool found_leaf, found;
 
 	for (int i = 0; i < run_information.point_count; i++) { // loop through points
-		// level = 0;
 		lb = 0, ub = 6;
 		found_leaf = false;
-		// std::cout << "i " << i << std::endl;
 		while (!found_leaf) {
 			for (int j = lb; j <= ub; j++) { // find the panel at a given level which contains the point
-				// std::cout << "i "<< i << " j " << j << std::endl;
 				found = false;
 				if (source_tree[j].point_count > 0) {
 					for (int k = 0; k < source_tree[j].point_count; k++) {
-						// std::cout << source_tree[j].points_inside.size() << std::endl;
-						// std::cout << "i " << i << " j " << j << " k " << k << " " << source_tree[j].points_inside[k] << std::endl;
 						if (i == source_tree[j].points_inside[k]) {
-							// std::cout << "here" << std::endl;
 							found = true;
 							if (source_tree[j].is_leaf) {
-								// std::cout << "here 1" << std::endl;
 								point_source_leaf[i] = j;
-								// std::cout << "here 2" << std::endl;
 								found_leaf = true;
-								// std::cout << "here 3" << std::endl;
 								break;
 							} else {
 								new_lb = source_tree[j].child_panel_1;
 								new_ub = source_tree[j].child_panel_4;
 								break;
-							}
-							
+							}	
 						}
 					}
-					// std::cout << "here 4" << std::endl;
 				}
-				// std::cout << "here 5" << std::endl;
 				if (found) break;
 			}
-			// std::cout << "here 6" << std::endl;
 			if (found_leaf) break;
 			lb = new_lb;
 			ub = new_ub;
 		}
-		// std::cout << "here 7" << std::endl;
 	}
-	// std::cout << "here 8" << std::endl;
 }
 
 void upward_pass(const RunConfig& run_information, const std::vector<CubePanel>& source_tree, const std::vector<double>& xcos, 
@@ -67,7 +52,7 @@ void upward_pass(const RunConfig& run_information, const std::vector<CubePanel>&
 	std::vector<double> xieta, cheb_xi, cheb_eta;
 	std::vector<std::vector<double>> basis_vals;
 	double x, y, z, min_xc, max_xc, min_ec, max_ec;
-	int leaf, deg, source_size, parent;
+	int leaf, deg, source_size, parent, i_s;
 
 	assign_points_to_source_leafs(run_information, source_tree, xcos, ycos, zcos, point_source_leaf);
 	deg = run_information.interp_degree;
@@ -196,14 +181,11 @@ void fmm_inverse_laplacian(const RunConfig& run_information, const std::vector<I
 			if (interactions[i].interact_type == 0) { // PP
 				fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
 			} else if (interactions[i].interact_type == 1) { // PC
-				// fmm_pc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], integral);
-				fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
+				fmm_pc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], integral);
 			} else if (interactions[i].interact_type == 2) { // CP
-				// fmm_cp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, proxy_target_potenti[i_t]);
-				fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
+				fmm_cp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, proxy_target_potenti[i_t]);
 			} else { // CC
-				// fmm_cc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], proxy_target_potenti[i_t]);
-				fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
+				fmm_cc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], proxy_target_potenti[i_t]);
 			}
 		}
 	}
