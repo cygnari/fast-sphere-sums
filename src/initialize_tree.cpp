@@ -7,7 +7,7 @@
 #include "structs.hpp"
 
 void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePanel>& cube_panels, const std::vector<double>& x,
-        const std::vector<double>& y, const std::vector<double>& z) {
+        const std::vector<double>& y, const std::vector<double>& z, std::vector<int>& point_source_leaf) {
   // sets up fast sum cubed sphere
   cube_panels.resize(6);
   for (int i = 0; i < 6; i++) {
@@ -33,6 +33,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
     // std::cout << face << std::endl;
     cube_panels[face-1].point_count += 1;
     cube_panels[face-1].points_inside.push_back(i);
+    point_source_leaf[i] = face;
   }
 
   double mid_xi, mid_eta, min_xi, max_xi, min_eta, max_eta, xi, eta;
@@ -109,6 +110,7 @@ void initialize_cube_tree(const RunConfig& run_information, std::vector<CubePane
         }
         cube_panels[start+which_panel].point_count += 1;
         cube_panels[start+which_panel].points_inside.push_back(points_to_assign[j]);
+        point_source_leaf[points_to_assign[j]] = start+which_panel;
       }
       point_count = cube_panels[start].point_count + cube_panels[start+1].point_count + cube_panels[start+2].point_count + cube_panels[start+3].point_count;
       if (point_count != cube_panels[i].point_count) {

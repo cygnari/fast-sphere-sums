@@ -70,8 +70,9 @@ int main(int argc, char **argv) {
   if (run_information.use_fast) {
     // use fast summation
     std::vector<CubePanel> cube_panels_target, cube_panels_source;
-    initialize_cube_tree(run_information, cube_panels_target, xcos_t, ycos_t, zcos_t);
-    initialize_cube_tree(run_information, cube_panels_source, xcos_s, ycos_s, zcos_s);
+    std::vector<int> point_source_leaf (run_information.point_count, -1);
+    initialize_cube_tree(run_information, cube_panels_target, xcos_t, ycos_t, zcos_t, point_source_leaf);
+    initialize_cube_tree(run_information, cube_panels_source, xcos_s, ycos_s, zcos_s, point_source_leaf);
 
     std::vector<InteractPair> interactions;
     begin = std::chrono::steady_clock::now();

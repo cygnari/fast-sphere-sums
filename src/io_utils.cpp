@@ -83,7 +83,7 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
     } else {
       run_information.interp_point_count = pow(run_information.interp_degree + 1, 2);
       if (run_information.fast_sum_cluster_thresh == -1) {
-        run_information.fast_sum_cluster_thresh = run_information.interp_point_count + 2;
+        run_information.fast_sum_cluster_thresh = 4*run_information.interp_point_count + 2;
       }
 
       return;

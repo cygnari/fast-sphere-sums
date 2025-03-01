@@ -46,15 +46,15 @@ void assign_points_to_source_leafs(const RunConfig& run_information, const std::
 
 void upward_pass(const RunConfig& run_information, const std::vector<CubePanel>& source_tree, const std::vector<double>& xcos, 
 				 const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, 
-				 const std::vector<double>& potential, std::vector<std::vector<std::vector<double>>>& proxy_source_weights) {
+				 const std::vector<double>& potential, const std::vector<int>& point_source_leaf, 
+				 std::vector<std::vector<std::vector<double>>>& proxy_source_weights) {
 	// performs the upward pass to interpolate from points to weights in the leaf panels, then from leaf panels up the source tree
-	std::vector<int> point_source_leaf (run_information.point_count, -1);
+	// std::vector<int> point_source_leaf (run_information.point_count, -1);
 	std::vector<double> xieta, cheb_xi, cheb_eta;
 	std::vector<std::vector<double>> basis_vals;
 	double x, y, z, min_xc, max_xc, min_ec, max_ec;
 	int leaf, deg, source_size, parent, i_s;
 
-	assign_points_to_source_leafs(run_information, source_tree, xcos, ycos, zcos, point_source_leaf);
 	deg = run_information.interp_degree;
 	source_size = source_tree.size();
 	
@@ -89,7 +89,7 @@ void upward_pass(const RunConfig& run_information, const std::vector<CubePanel>&
 			max_ec = source_tree[parent].max_eta;
 			for (int j = 0; j < deg+1; j++) {
 				for (int k = 0; k < deg+1; k++) {
-					basis_vals = interp_vals_bli(cheb_xi[i], cheb_eta[j], min_xc, max_xc, min_ec, max_ec, deg);
+					basis_vals = interp_vals_bli(cheb_xi[j], cheb_eta[k], min_xc, max_xc, min_ec, max_ec, deg);
 					for (int l = 0; l < deg+1; l++) {
 						for (int m = 0; m < deg+1; m++) {
 							proxy_source_weights[parent][l][m] += basis_vals[l][m]*proxy_source_weights[i][j][k];
@@ -118,7 +118,7 @@ void downward_pass(const RunConfig& run_information, const std::vector<CubePanel
 		min_ep = target_tree[i].min_eta;
 		max_ep = target_tree[i].max_eta;
 		if (!target_tree[i].is_leaf) { // interpolate from parent panel to child panel
-			for (int j = target_tree[i].child_panel_1; j < target_tree[i].child_panel_4; j++) {
+			for (int j = target_tree[i].child_panel_1; j <= target_tree[i].child_panel_4; j++) {
 				min_xc = target_tree[j].min_xi;
 				max_xc = target_tree[j].max_xi;
 				min_ec = target_tree[j].min_eta;
@@ -157,7 +157,7 @@ void downward_pass(const RunConfig& run_information, const std::vector<CubePanel
 void fmm_inverse_laplacian(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& source_tree,
 						   const std::vector<CubePanel>& target_tree, const std::vector<double>& xcos, const std::vector<double>& ycos, 
 						   const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, 
-						   std::vector<double>& integral) {
+						   const std::vector<int>& point_source_leaf, std::vector<double>& integral) {
 	// use an upward pass and downward pass to compute proxy source weights/proxy target potentials
 	// four types of interactions
 	int source_tree_count = source_tree.size();
@@ -171,7 +171,7 @@ void fmm_inverse_laplacian(const RunConfig& run_information, const std::vector<I
 																		std::vector<std::vector<double>> (id+1, 
 																										  std::vector<double> (id+1, 0)));
 
-	upward_pass(run_information, source_tree, xcos, ycos, zcos, area, potential, proxy_source_weights);
+	upward_pass(run_information, source_tree, xcos, ycos, zcos, area, potential, point_source_leaf, proxy_source_weights);
 
 	for (int i = 0; i < interactions.size(); i++) {
 		if (i % run_information.mpi_P == run_information.mpi_ID) {
@@ -181,11 +181,15 @@ void fmm_inverse_laplacian(const RunConfig& run_information, const std::vector<I
 			if (interactions[i].interact_type == 0) { // PP
 				fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
 			} else if (interactions[i].interact_type == 1) { // PC
+				// fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
 				fmm_pc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], integral);
 			} else if (interactions[i].interact_type == 2) { // CP
+				// fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
 				fmm_cp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, proxy_target_potenti[i_t]);
 			} else { // CC
+				// fmm_pp_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, potential, integral);
 				fmm_cc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], proxy_target_potenti[i_t]);
+				// fmm_pc_interaction_inverse_laplacian(run_information, source_tree[i_s], target_tree[i_t], xcos, ycos, zcos, area, proxy_source_weights[i_s], integral);
 			}
 		}
 	}
