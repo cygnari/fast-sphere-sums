@@ -49,6 +49,15 @@ void x_cubed(const std::vector<double>& xcos, const std::vector<double>& ycos, c
   }
 }
 
+void rh4(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  double constant = 2.0*M_PI/7.0;
+  std::vector<double> ll;
+  for (int i = 0; i < potential.size(); i++) {
+    ll = xyz_to_latlon(xcos[i], ycos[i], zcos[i]);
+    potential[i] = constant*sin(ll[0])+30.0*sin(ll[0])*pow(cos(ll[0]), 4)*cos(4*ll[1]);
+  }
+}
+
 void initialize_condition(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
   // initial condition
   if (run_information.initial_condition == "SH43") {
@@ -64,6 +73,8 @@ void initialize_condition(const RunConfig& run_information, const std::vector<do
     test_func_one(xcos, ycos, zcos, potential);
   } else if (run_information.initial_condition == "x3") {
     x_cubed(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "RH4") {
+    rh4(xcos, ycos, zcos, potential);
   }
 }
 

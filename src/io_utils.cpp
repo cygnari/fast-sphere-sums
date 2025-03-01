@@ -26,6 +26,10 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
       if (stoi(word2) == 1) {
         run_information.use_fast = true;
       }
+    } else if (word1 == "use_fmm") {
+      if (stoi(word2) == 1) {
+        run_information.use_fmm = true;
+      }
     } else if (word1 == "out_path") {
       run_information.out_path = word2;
     } else if (word1 == "write_output") {
@@ -93,7 +97,12 @@ std::string create_config(const RunConfig &run_information, const std::string ex
   std::string output_filename = std::to_string(run_information.time) + "_" +
       std::to_string(run_information.point_count) + "_" + run_information.initial_condition + "_";
   if (run_information.use_fast) {
-    output_filename += "fast_" + std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree);
+    if (run_information.use_fmm) {
+      output_filename += "fmm_";
+    } else {
+      output_filename += "tc_";
+    }
+    output_filename += std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree);
   } else
     output_filename += "direct";
   output_filename += extra;

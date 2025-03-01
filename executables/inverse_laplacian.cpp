@@ -7,6 +7,7 @@
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
 #include "fast_sum_funcs.hpp"
+#include "fmm_funcs.hpp"
 #include "general_utils.hpp"
 #include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
@@ -72,8 +73,12 @@ int main(int argc, char **argv) {
       std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
     }
     begin = std::chrono::steady_clock::now();
-    fast_sum_inverse_laplacian(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
-    sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
+    if (run_information.use_fmm) {
+      fmm_inverse_laplacian(run_information, interactions, cube_panels, cube_panels, xcos, ycos, zcos, area, potential, integrated);
+    } else {
+      fast_sum_inverse_laplacian(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated);
+    }
+    // sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   } else {
     // direct summation

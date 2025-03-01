@@ -30,4 +30,9 @@ void fast_sum_sal_lon_deriv(const RunConfig& run_information, const std::vector<
                                         const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
                                         const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral);
 
+void fast_sum_bve(const RunConfig& run_information, const std::vector<InteractPair>& interactions, const std::vector<CubePanel>& cube_panels,
+                                        const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos,
+                                        const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral_1, 
+                                        std::vector<double>& integral_2, std::vector<double>& integral_3);
+
 #endif

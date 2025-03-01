@@ -21,4 +21,4 @@ run-output
 !*CMakeLists.txt
 build
 include
-!data-files/*.csv
+data-files/*.csv

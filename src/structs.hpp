@@ -6,6 +6,7 @@
 
 struct RunConfig {
   bool use_fast = false;
+  bool use_fmm = false;
   bool use_cesaro = false; // use cesaro summed kernel or not
   std::string out_path;    // ../../run-output/ locally, on Derecho, /glade/derecho/scratch/achen/sal/
   int write_precision = 6; // number of decimal places, 6 for data visualization, 16 for error testing
@@ -20,7 +21,7 @@ struct RunConfig {
   int info_per_point; // how many doubles each point is, for example, storing x y z vor tracer = 5
   int time; // time 0, 1, 2, or 3
   int sph_harm_comps; // number of spherical harmonic components to use
-  std::string grid; // "mpas_ocean_grid" or "icos_grid"
+  std::string grid; // "mpas_ocean_grid" or "icos_grid" or "cube_grid" or "ll_grid"
   bool rotate = true; // whether or not to rotate the points
   double alph = 0.01; // 3 rotation coefficients
   double beta = 0.01;

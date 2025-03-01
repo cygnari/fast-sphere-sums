@@ -34,7 +34,7 @@ void pp_interaction_inverse_biharmonic(const RunConfig& run_information, const C
     tz = zcos_t[target_i];
     for (int j = 0; j < source_count; j++) {
       sx = sxs[j], sy = sys[j], sz = szs[j];
-      gfval = -1.0/(4.0*M_PI)*dilog(0.5*(1-tx*sx-ty*sy-tz*sz));
+      gfval = 1.0/(4.0*M_PI)*dilog(0.5*(1+tx*sx+ty*sy+tz*sz));
       integral[target_i] += gfval * areas[j] * pots[j];
     }
   }
@@ -87,7 +87,7 @@ void pc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
         xyz = xyz_from_xieta(xi, eta, cube_panel_source.face);
         // sx = xyz[0], sy = xyz[1], sz = xyz[2];
         // integral[point_index] += (gfc+dilog(0.5*(1-tx*xyz[0]-ty*xyz[1]-tz*xyz[2]))) * proxy_weights[j][k];
-        integral[point_index] += -1.0/(4.0*M_PI)*dilog(0.5*(1-tx*xyz[0]-ty*xyz[1]-tz*xyz[2])) * proxy_weights[j][k];
+        integral[point_index] += 1.0/(4.0*M_PI)*dilog(0.5*(1+tx*xyz[0]+ty*xyz[1]+tz*xyz[2])) * proxy_weights[j][k];
       }
     }
   }
@@ -123,7 +123,7 @@ void cp_interaction_inverse_biharmonic(const RunConfig& run_information, const C
         // loop over source points
         sx = sxs[k], sy = sys[k], sz = szs[k];
         // func_points[i][j] += (gfc+dilog(0.5*(1-sx*xyz[0]-sy*xyz[1]-sz*xyz[2]))) * areas[k]*pots[k];
-        func_points[i][j] += -1.0/(4.0*M_PI)*dilog(0.5*(1-sx*xyz[0]-sy*xyz[1]-sz*xyz[2]))*areas[k]*pots[k];
+        func_points[i][j] += 1.0/(4.0*M_PI)*dilog(0.5*(1+sx*xyz[0]+sy*xyz[1]+sz*xyz[2]))*areas[k]*pots[k];
       }
     }
   }
@@ -205,7 +205,7 @@ void cc_interaction_inverse_biharmonic(const RunConfig& run_information, const C
           xyz_s = xyz_from_xieta(xi_s, eta_s, cube_panel_source.face);
           cxs = xyz_s[0], cys = xyz_s[1], czs = xyz_s[2];
           // func_points[i][j] += (gfc+dilog(0.5*(1-cxs*cxt-cys*cyt-czs*czt)))*proxy_weights[k][l];
-          func_points[i][j]+=-1.0/(4.0*M_PI)*dilog(0.5*(1-cxs*cxt-cys*cyt-czs*czt))*proxy_weights[k][l];
+          func_points[i][j]+=1.0/(4.0*M_PI)*dilog(0.5*(1+cxs*cxt+cys*cyt+czs*czt))*proxy_weights[k][l];
         }
       }
     }

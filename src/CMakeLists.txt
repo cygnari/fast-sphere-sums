@@ -1,12 +1,15 @@
 add_library(FastSphereSums
     direct_sum_funcs.cpp
+    ./fast_sum_interactions/bve_interactions.cpp
     ./fast_sum_interactions/inverse_laplacian_interactions.cpp
     ./fast_sum_interactions/inverse_biharmonic_interactions.cpp
     ./fast_sum_interactions/laplacian_interactions.cpp
     ./fast_sum_interactions/sal_interactions.cpp
     ./fast_sum_interactions/sal_interactions_lat_deriv.cpp
     ./fast_sum_interactions/sal_interactions_lon_deriv.cpp
+    ./fmm_interactions/inverse_laplacian_interactions.cpp
     fast_sum_funcs.cpp
+    fmm_funcs.cpp
     general_utils.cpp
     initial_conditions.cpp
     initialize_tree.cpp
@@ -24,13 +27,16 @@ install(FILES
     # all FastSphereSums header/include files go here
     ${CMAKE_BINARY_DIR}/fast-sphere-sums-config.h
     direct_sum_funcs.hpp
+    ./fast_sum_interactions/bve_interactions.hpp
     ./fast_sum_interactions/inverse_laplacian_interactions.hpp
     ./fast_sum_interactions/inverse_biharmonic_interactions.hpp
     ./fast_sum_interactions/laplacian_interactions.hpp
     ./fast_sum_interactions/sal_interactions.hpp
     ./fast_sum_interactions/sal_interactions_lat_deriv.hpp
     ./fast_sum_interactions/sal_interactions_lon_deriv.hpp
+    ./fmm_interactions/inverse_laplacian_interactions.hpp
     fast_sum_funcs.hpp
+    fumm_funcs.hpp
     initial_conditions.hpp
     initialize_tree.hpp
     interp_utils.hpp

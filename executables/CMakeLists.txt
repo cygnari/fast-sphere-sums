@@ -54,6 +54,13 @@ target_include_directories(sal_derivs PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>)
 
+add_executable(bve bve.cpp)
+target_link_libraries(bve PUBLIC FastSphereSums)
+target_include_directories(bve PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
 add_executable(icos_grid_gen icos_grid_gen.cpp)
 target_link_libraries(icos_grid_gen PUBLIC FastSphereSums)
 target_include_directories(icos_grid_gen PUBLIC
@@ -71,6 +78,13 @@ target_include_directories(icos_grid_gen_centroid PUBLIC
 add_executable(cube_sphere_grid_gen cube_sphere_grid_gen.cpp)
 target_link_libraries(cube_sphere_grid_gen PUBLIC FastSphereSums)
 target_include_directories(cube_sphere_grid_gen PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
+add_executable(lat_lon_grid_gen lat_lon_grid_gen.cpp)
+target_link_libraries(lat_lon_grid_gen PUBLIC FastSphereSums)
+target_include_directories(lat_lon_grid_gen PUBLIC
   $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>)

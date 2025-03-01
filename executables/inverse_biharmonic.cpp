@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
     std::cout << "integration time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
 
     if (run_information.write_output) {
-      std::string output_folder = create_config(run_information) + "_inverse_biharmonic";
+      std::string output_folder = create_config(run_information) + "_inv_biharm";
       std::string filename = NAMELIST_DIR + std::string("initialize.py ") + run_information.out_path + "/" + output_folder;
       std::string command = "python ";
       command += filename;

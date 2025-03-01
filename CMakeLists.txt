@@ -19,7 +19,7 @@ if (BUILD_SHARED_LIBS)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE -O3)
+set(CMAKE_CXX_FLAGS_RELEASE -g)
 
 # turn off deprecated env variable handling:
 # cmake will now use $<Package>_ROOT env variables in its search for Package
