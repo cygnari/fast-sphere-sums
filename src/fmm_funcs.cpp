@@ -16,7 +16,7 @@ void upward_pass(const RunConfig& run_information, const std::vector<CubePanel>&
 	// std::vector<int> point_source_leaf (run_information.point_count, -1);
 	std::vector<double> xieta, cheb_xi, cheb_eta;
 	std::vector<std::vector<double>> basis_vals;
-	std::queue<int> child_panels;
+	// std::queue<int> child_panels;
 	
 	double x, y, z, min_xc, max_xc, min_ec, max_ec;
 	int leaf, deg, source_size, parent, i_s;
