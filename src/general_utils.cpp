@@ -163,6 +163,28 @@ std::vector<double> barycoords(const std::vector<double> &p1, const std::vector<
   return coords;
 }
 
+std::vector<double> normalized_barycoords(const std::vector<double> &p1,
+                                          const std::vector<double> &p2,
+                                          const std::vector<double> &p3,
+                                          const std::vector<double> &p) {
+  // returns normalized barycentric coordinates so b1 + b2 + b3 = 1
+  std::vector<double> coords;
+  double sum;
+  coords = barycoords(p1, p2, p3, p[0], p[1], p[2]);
+  sum = coords[0] + coords[1] + coords[2];
+  return {coords[0]/sum, coords[1]/sum, coords[2]/sum};
+}
+
+bool check_in_tri_thresh(const std::vector<double> &p1, const std::vector<double> &p2,
+                         const std::vector<double> &p3, const double x, const double y, const double z, const double threshold) { // checks if point p is in triangle
+  std::vector<double> bary_coord = barycoords(p1, p2, p3, x, y, z);
+  if ((bary_coord[0] >= -threshold) and (bary_coord[1] >= -threshold) and
+      (bary_coord[2] >= -threshold))
+    return true;
+  else
+    return false;
+}
+
 double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> &p2,
                        const std::vector<double> &p3, const double radius) {
   // finds the area of a spherical triangle

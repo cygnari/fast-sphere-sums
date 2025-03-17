@@ -61,6 +61,13 @@ target_include_directories(bve PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include>)
 
+add_executable(bve_time_evo bve_time_evo.cpp)
+target_link_libraries(bve_time_evo PUBLIC FastSphereSums)
+target_include_directories(bve_time_evo PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
+
 add_executable(icos_grid_gen icos_grid_gen.cpp)
 target_link_libraries(icos_grid_gen PUBLIC FastSphereSums)
 target_include_directories(icos_grid_gen PUBLIC

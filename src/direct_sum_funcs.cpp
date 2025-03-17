@@ -23,6 +23,9 @@ void direct_sum_invert_laplacian(const RunConfig& run_information, const std::ve
 void direct_sum_bve(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral_1, std::vector<double>& integral_2, std::vector<double>& integral_3) {
   // perform direct summation to convolve to invert the laplacian
   double tx, ty, tz, sx, sy, sz, part;
+  std::fill(integral_1.begin(), integral_1.end(), 0);
+  std::fill(integral_2.begin(), integral_2.end(), 0);
+  std::fill(integral_3.begin(), integral_3.end(), 0);
   // for (int i = 0; i < xcos.size(); i++) { // loop over targets
   for (int i = run_information.two_d_one_lb; i < run_information.two_d_one_ub; i++) {
     tx = xcos[i], ty = ycos[i], tz = zcos[i];

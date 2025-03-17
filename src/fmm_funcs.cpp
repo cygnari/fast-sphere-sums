@@ -225,10 +225,19 @@ void fmm_bve(const RunConfig& run_information, const std::vector<InteractPair>& 
 	int target_tree_count = target_tree.size();
 	int id = run_information.interp_degree;
 	int i_t, i_s;
+	std::fill(integral1.begin(), integral1.end(), 0);
+	std::fill(integral2.begin(), integral2.end(), 0);
+	std::fill(integral3.begin(), integral3.end(), 0);
 	std::vector<std::vector<std::vector<double>>> proxy_source_weights (source_tree_count, 
 																		std::vector<std::vector<double>> (id+1, 
 																										  std::vector<double> (id+1, 0)));
-	std::vector<std::vector<std::vector<double>>> proxy_target_potenti (target_tree_count, 
+	std::vector<std::vector<std::vector<double>>> proxy_target_potenti1 (target_tree_count, 
+																		std::vector<std::vector<double>> (id+1, 
+																										  std::vector<double> (id+1, 0)));
+	std::vector<std::vector<std::vector<double>>> proxy_target_potenti2 (target_tree_count, 
+																		std::vector<std::vector<double>> (id+1, 
+																										  std::vector<double> (id+1, 0)));
+	std::vector<std::vector<std::vector<double>>> proxy_target_potenti3 (target_tree_count, 
 																		std::vector<std::vector<double>> (id+1, 
 																										  std::vector<double> (id+1, 0)));
 
@@ -251,4 +260,7 @@ void fmm_bve(const RunConfig& run_information, const std::vector<InteractPair>& 
 			}
 		}
 	}
+
+	downward_pass_3(run_information, target_tree, xcos, ycos,zcos, proxy_target_potenti1, proxy_target_potenti2, 
+					proxy_target_potenti3, integral1, integral2, integral3);
 }

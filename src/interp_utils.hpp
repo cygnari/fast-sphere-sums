@@ -19,4 +19,7 @@ std::vector<std::vector<double>> interp_vals_bli(const double xi, const double e
 
 std::vector<double> bli_interp_points_shift(const double min_x, const double max_x, const int degree);
 
+std::tuple<int, int> find_leaf_tri(double tx, double ty, double tz, const std::vector<double> &xcos, const std::vector<double> &ycos, const std::vector<double> &zcos,
+                     const std::vector<std::vector<std::vector<int>>> &dynamics_triangles, const std::vector<std::vector<bool>> &dynamics_triangles_is_leaf, const int max_level);
+
 #endif

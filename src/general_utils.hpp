@@ -32,6 +32,14 @@ double gcdist(const std::vector<double> p1, const std::vector<double> p2, const 
 std::vector<double> barycoords(const std::vector<double> &p1, const std::vector<double> &p2,
                                const std::vector<double> &p3, const double x, const double y, const double z);
 
+std::vector<double> normalized_barycoords(const std::vector<double> &p1,
+                                          const std::vector<double> &p2,
+                                          const std::vector<double> &p3,
+                                          const std::vector<double> &p);
+
+bool check_in_tri_thresh(const std::vector<double> &p1, const std::vector<double> &p2,
+                         const std::vector<double> &p3, const double x, const double y, const double z, const double threshold);
+
 double sphere_tri_area(const std::vector<double> &p1, const std::vector<double> &p2, const std::vector<double> &p3, const double radius);
 
 double sal_gf_interp_40(const double x);

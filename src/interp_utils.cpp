@@ -1,5 +1,6 @@
 #include <vector>
 #include <cmath>
+#include "general_utils.hpp"
 
 void fekete_init(std::vector<std::vector<double>> &points, const int degree) {
   double delta_x = 1.0 / degree;
@@ -192,4 +193,102 @@ std::vector<double> bli_interp_points_shift(const double min_x, const double max
     }
   }
   return cheb_points;
+}
+
+std::tuple<int, int> find_leaf_tri(double tx, double ty, double tz, const std::vector<double> &xcos, const std::vector<double> &ycos, const std::vector<double> &zcos,
+                     const std::vector<std::vector<std::vector<int>>> &dynamics_triangles, const std::vector<std::vector<bool>> &dynamics_triangles_is_leaf, const int max_level) {
+  bool found_leaf_tri = false, found_curr_level;
+  double epsilon = pow(10, -10);
+  int curr_level = -1;
+  int lb = 0;
+  int ub = 20;
+  int iv1, iv2, iv3, tri_loc = -1;
+  std::vector<double> v1, v2, v3, bary_cords;
+  std::vector<double> tri_cent;
+  double curr_best_dist = INT_MAX, dist, found_tri_radius;
+  int curr_best_tri;
+
+  for (int level = 0; level < max_level; level++) {
+    found_curr_level = false;
+
+    for (int j = lb; j < ub; j++) {
+      iv1 = dynamics_triangles[level][j][0];
+      iv2 = dynamics_triangles[level][j][1];
+      iv3 = dynamics_triangles[level][j][2];
+      v1 = {xcos[iv1], ycos[iv1], zcos[iv1]};
+      v2 = {xcos[iv2], ycos[iv2], zcos[iv2]};
+      v3 = {xcos[iv3], ycos[iv3], zcos[iv3]};
+      // bary_cords = barycoords(v1, v2, v3, tx, ty, tz);
+
+      if (check_in_tri_thresh(v1, v2, v3, tx, ty, tz, epsilon)) {
+        found_curr_level = true;
+        curr_level = level;
+        tri_loc = j;
+        if (dynamics_triangles_is_leaf[level][j]) {
+          found_leaf_tri = true;
+          tri_loc = j;
+          curr_level = level;
+          break;
+        } else {
+          lb = 4 * j;
+          ub = 4 * j + 4;
+          break;
+        }
+      }
+    }
+    if (found_leaf_tri)
+      break;
+    if (not found_curr_level) {
+      for (int j = 0; j < 20 * pow(4, level); j++) {
+        iv1 = dynamics_triangles[level][j][0];
+        iv2 = dynamics_triangles[level][j][1];
+        iv3 = dynamics_triangles[level][j][2];
+        v1 = {xcos[iv1], ycos[iv1], zcos[iv1]};
+        v2 = {xcos[iv2], ycos[iv2], zcos[iv2]};
+        v3 = {xcos[iv3], ycos[iv3], zcos[iv3]};
+        // bary_cords = barycoords(v1, v2, v3, tx, ty, tz);
+        if (check_in_tri_thresh(v1, v2, v3, tx, ty, tz, epsilon)) {
+          found_curr_level = true;
+          curr_level = level;
+          tri_loc = j;
+          if (dynamics_triangles_is_leaf[level][j]) {
+            found_leaf_tri = true;
+            tri_loc = j;
+            curr_level = level;
+            break;
+          } else {
+            lb = 4 * j;
+            ub = 4 * j + 4;
+            break;
+          }
+        }
+      }
+    }
+    if (found_leaf_tri)
+      break;
+  }
+
+  if (found_leaf_tri) {
+    return std::make_tuple(curr_level, tri_loc);
+  } else {
+    for (int i = max_level - 1; i > 0; i--) {
+      for (int j = 0; j < 20 * pow(4, i); j++) {
+
+        iv1 = dynamics_triangles[i][j][0];
+        iv2 = dynamics_triangles[i][j][1];
+        iv3 = dynamics_triangles[i][j][2];
+        v1 = {xcos[iv1], ycos[iv1], zcos[iv1]};
+        v2 = {xcos[iv2], ycos[iv2], zcos[iv2]};
+        v3 = {xcos[iv3], ycos[iv3], zcos[iv3]};
+        // bary_cords = barycoords(v1, v2, v3, target_point);
+        if (check_in_tri_thresh(v1, v2, v3, tx, ty, tz, epsilon)) {
+          curr_level = i;
+          tri_loc = j;
+          return std::make_tuple(curr_level, tri_loc);
+        }
+      }
+    }
+    throw std::runtime_error("Failed to locate point in a leaf triangle");
+    return std::make_tuple(-1, -1);
+  }
 }

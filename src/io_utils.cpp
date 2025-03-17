@@ -42,6 +42,8 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
       run_information.radius = stod(word2);
     } else if (word1 == "point_count") {
       run_information.point_count = stoi(word2);
+    } else if (word1 == "levels") {
+      run_information.levels = stoi(word2);
     } else if (word1 == "fast_sum_cluster_thresh") {
       run_information.fast_sum_cluster_thresh = stoi(word2);
     } else if (word1 == "theta") {
@@ -72,14 +74,18 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
       run_information.gamm = stod(word2);
     } else if (word1 == "sph_harm_comps") {
       run_information.sph_harm_comps = stoi(word2);
-    } else if (word1 == "use_ces") {
+    } else if (word1 == "use_remesh") {
       if (stoi(word2) == 1) {
-        run_information.use_cesaro = true;
+        run_information.use_remesh = true;
       }
     } else if (word1 == "grid") {
       run_information.grid = word2;
     } else if (word1 == "kernel_eps") {
       run_information.kernel_eps = stod(word2);
+    } else if (word1 == "end_time") {
+      run_information.end_time = stoi(word2);
+    } else if (word1 == "delta_t") {
+      run_information.delta_t = stoi(word2);
     } else {
       run_information.interp_point_count = pow(run_information.interp_degree + 1, 2);
       if (run_information.fast_sum_cluster_thresh == -1) {
@@ -89,6 +95,7 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
         //   run_information.fast_sum_cluster_thresh = run_information.interp_point_count + 2;
         // }
       }
+      run_information.time_steps = run_information.end_time / run_information.delta_t;
       return;
     }
   }
@@ -97,8 +104,7 @@ void read_run_config(const std::string file_name, RunConfig &run_information) {
 std::string create_config(const RunConfig &run_information, const std::string extra) {
   std::stringstream ss1, ss2, ss3;
   int precision;
-  std::string output_filename = std::to_string(run_information.time) + "_" +
-      std::to_string(run_information.point_count) + "_" + run_information.initial_condition + "_";
+  std::string output_filename = std::to_string(run_information.point_count) + "_" + run_information.initial_condition + "_";
   if (run_information.use_fast) {
     if (run_information.use_fmm) {
       output_filename += "fmm_";
@@ -108,6 +114,9 @@ std::string create_config(const RunConfig &run_information, const std::string ex
     output_filename += std::to_string(run_information.fast_sum_theta).substr(0, 3) + "_" + std::to_string(run_information.interp_degree);
   } else
     output_filename += "direct";
+  if (run_information.use_remesh) {
+    output_filename += "_remesh";
+  }
   output_filename += extra;
   return output_filename;
 }

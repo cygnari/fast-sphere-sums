@@ -7,7 +7,7 @@
 struct RunConfig {
   bool use_fast = false;
   bool use_fmm = false;
-  bool use_cesaro = false; // use cesaro summed kernel or not
+  bool use_remesh = false; // use cesaro summed kernel or not
   std::string out_path;    // ../../run-output/ locally, on Derecho, /glade/derecho/scratch/achen/sal/
   int write_precision = 6; // number of decimal places, 6 for data visualization, 16 for error testing
   bool write_output = false;
@@ -16,6 +16,7 @@ struct RunConfig {
   // 2562, 10242, 40962, 163842, 655362, 2621442 for icos grid
   // full point count is 2313486 for mpas grid
   // 453657 points for mom6
+  int levels; // refinement level
   int interp_degree;      // interpolation degree
   int interp_point_count; // number of interpolation points
   int info_per_point; // how many doubles each point is, for example, storing x y z vor tracer = 5
@@ -28,6 +29,9 @@ struct RunConfig {
   double gamm = 0.01;
   double kernel_eps = 0.0; // kernel regularization parameter
   // epsilon for regularized kernels
+  int end_time; // end time in seconds
+  int delta_t; // time step in seconds 
+  int time_steps;
 
   std::string initial_condition; // initial vorticity distribution
   int init_cond_param1;              // parameter for initial condition
