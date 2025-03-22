@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <chrono>
+#include <tuple>
 
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
