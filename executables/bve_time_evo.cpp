@@ -223,36 +223,36 @@ void remesh_points(const RunConfig &run_information, const std::vector<std::vect
 		// target_tra[i] 
 		tra = interp_eval_sbb(curr_alphas, bary_cords[0], bary_cords[1], bary_cords[2], 2);
 		// check monotonicity 
-		vor1 = new_vors[ivs[0]]+2*omega*new_co[2][ivs[0]];
-		vor2 = new_vors[ivs[1]]+2*omega*new_co[2][ivs[1]];
-		vor3 = new_vors[ivs[2]]+2*omega*new_co[2][ivs[2]];
-		vor4 = new_vors[ivs[3]]+2*omega*new_co[2][ivs[3]];
-		vor5 = new_vors[ivs[4]]+2*omega*new_co[2][ivs[4]];
-		vor6 = new_vors[ivs[5]]+2*omega*new_co[2][ivs[5]];
-		vormax = std::max(vor1, std::max(vor2, std::max(vor3, std::max(vor4, std::max(vor5, vor6)))));
-		vormin = std::min(vor1, std::min(vor2, std::min(vor3, std::min(vor4, std::min(vor5, vor6)))));
-		vormed = 0.5*(vormax+vormin);
-		vors = 0.5*(vormax-vormin);
-		vormax = vormed+1.5*vors; // a bit of leeway
-		vormin = vormed-1.5*vors;
-		if ((vor > vormax) or (vor < vormin)) {
-			// monotonicity violation, bilinear interp
-			ivs[0] = dynamics_triangles[curr_level][tri_loc][0];
-			ivs[1] = dynamics_triangles[curr_level][tri_loc][1];
-			ivs[2] = dynamics_triangles[curr_level][tri_loc][2];
-			v1 = {new_co[0][ivs[0]], new_co[1][ivs[0]], new_co[2][ivs[0]]};
-			v2 = {new_co[0][ivs[1]], new_co[1][ivs[1]], new_co[2][ivs[1]]};
-			v3 = {new_co[0][ivs[2]], new_co[1][ivs[2]], new_co[2][ivs[2]]};
-			vor1 = new_vors[ivs[0]]+2*omega*new_co[2][ivs[0]];
-			vor2 = new_vors[ivs[1]]+2*omega*new_co[2][ivs[1]];
-			vor3 = new_vors[ivs[2]]+2*omega*new_co[2][ivs[2]];
-			tra1 = new_tra[ivs[0]];
-			tra2 = new_tra[ivs[1]];
-			tra3 = new_tra[ivs[2]];
-			bary_cords = barycoords(v1, v2, v3, target_cos[0][i], target_cos[1][i], target_cos[2][i]);
-			vor = bary_cords[0]*vor1 + bary_cords[1]*vor2 + bary_cords[2]*vor3 - 2*omega*target_cos[2][i];
-			tra = bary_cords[0]*tra1 + bary_cords[1]*tra2 + bary_cords[2]*tra3;
-		}
+		// vor1 = new_vors[ivs[0]]+2*omega*new_co[2][ivs[0]];
+		// vor2 = new_vors[ivs[1]]+2*omega*new_co[2][ivs[1]];
+		// vor3 = new_vors[ivs[2]]+2*omega*new_co[2][ivs[2]];
+		// vor4 = new_vors[ivs[3]]+2*omega*new_co[2][ivs[3]];
+		// vor5 = new_vors[ivs[4]]+2*omega*new_co[2][ivs[4]];
+		// vor6 = new_vors[ivs[5]]+2*omega*new_co[2][ivs[5]];
+		// vormax = std::max(vor1, std::max(vor2, std::max(vor3, std::max(vor4, std::max(vor5, vor6)))));
+		// vormin = std::min(vor1, std::min(vor2, std::min(vor3, std::min(vor4, std::min(vor5, vor6)))));
+		// vormed = 0.5*(vormax+vormin);
+		// vors = 0.5*(vormax-vormin);
+		// vormax = vormed+1.5*vors; // a bit of leeway
+		// vormin = vormed-1.5*vors;
+		// if ((vor > vormax) or (vor < vormin)) {
+		// 	// monotonicity violation, bilinear interp
+		// 	ivs[0] = dynamics_triangles[curr_level][tri_loc][0];
+		// 	ivs[1] = dynamics_triangles[curr_level][tri_loc][1];
+		// 	ivs[2] = dynamics_triangles[curr_level][tri_loc][2];
+		// 	v1 = {new_co[0][ivs[0]], new_co[1][ivs[0]], new_co[2][ivs[0]]};
+		// 	v2 = {new_co[0][ivs[1]], new_co[1][ivs[1]], new_co[2][ivs[1]]};
+		// 	v3 = {new_co[0][ivs[2]], new_co[1][ivs[2]], new_co[2][ivs[2]]};
+		// 	vor1 = new_vors[ivs[0]]+2*omega*new_co[2][ivs[0]];
+		// 	vor2 = new_vors[ivs[1]]+2*omega*new_co[2][ivs[1]];
+		// 	vor3 = new_vors[ivs[2]]+2*omega*new_co[2][ivs[2]];
+		// 	tra1 = new_tra[ivs[0]];
+		// 	tra2 = new_tra[ivs[1]];
+		// 	tra3 = new_tra[ivs[2]];
+		// 	bary_cords = barycoords(v1, v2, v3, target_cos[0][i], target_cos[1][i], target_cos[2][i]);
+		// 	vor = bary_cords[0]*vor1 + bary_cords[1]*vor2 + bary_cords[2]*vor3 - 2*omega*target_cos[2][i];
+		// 	tra = bary_cords[0]*tra1 + bary_cords[1]*tra2 + bary_cords[2]*tra3;
+		// }
 		target_vors[i] = vor;
 		target_tra[i] = tra;
 	}
@@ -439,11 +439,13 @@ int main(int argc, char **argv) {
 				coordinates[2][j] = inter_state[2][j];
 				vorticity[j] = inter_vor[j];
 			}
-			cube_panels.clear();
-			point_source_leaf.clear();
-			interactions.clear();
-			initialize_cube_tree(run_information, cube_panels, coordinates[0], coordinates[1], coordinates[2], point_source_leaf);
-			dual_tree_traversal(run_information, interactions, cube_panels);
+			if (run_information.use_fast) {
+				cube_panels.clear();
+				point_source_leaf.clear();
+				interactions.clear();
+				initialize_cube_tree(run_information, cube_panels, coordinates[0], coordinates[1], coordinates[2], point_source_leaf);
+				dual_tree_traversal(run_information, interactions, cube_panels);
+			}	
 		}
 		if (ID == 0) {
 			write_state(vorticity, outpath, "vor_" + std::to_string(time) + ".csv");
