@@ -1,6 +1,8 @@
 #include <vector>
 #include <cmath>
 #include <tuple>
+#include <stdexcept>
+#include <climits>
 #include "general_utils.hpp"
 
 void fekete_init(std::vector<std::vector<double>> &points, const int degree) {
