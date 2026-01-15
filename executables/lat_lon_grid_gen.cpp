@@ -20,7 +20,7 @@ int check_point_exist(const std::vector<std::vector<int>> &parent_points,
 
 int main(int argc, char ** argv) {
   // generates an lat lon grid with grid spacing deg_sep
-  double deg_sep_between_points = 0.5;
+  double deg_sep_between_points = 0.125;
   int lat_points = static_cast<int>(180/deg_sep_between_points);
   int lon_points = static_cast<int>(360/deg_sep_between_points);
   std::vector<double> lat_vals (lat_points, 0);
@@ -52,14 +52,6 @@ int main(int argc, char ** argv) {
     lat = lat_vals[i]*M_PI/180.0;
     lat_area = lat_area_part[i];
     for (int j = 0; j < lon_points; j++) {
-      // if (index == 128525) {
-      //   std::cout << "lat: " << lat_vals[i] << ", lon: " << lon_vals[j] << std::endl;
-      //   std::cout << i << "," << j << std::endl;
-      // }
-      // if (index == 130325) {
-      //   std::cout << "lat: " << lat_vals[i] << ", lon: " << lon_vals[j] << std::endl;
-      //   std::cout << i << "," << j << std::endl;
-      // }
       lon = lon_vals[j]*M_PI/180.0;
       lon_area = lon_area_part[j];
       xyz = latlon_to_xyz(lat, lon, 1.0);

@@ -7,6 +7,7 @@
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
 #include "fast_sum_funcs.hpp"
+#include "fmm_funcs.hpp"
 #include "general_utils.hpp"
 #include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
@@ -57,10 +58,10 @@ int main(int argc, char **argv) {
   ycos_t = ycos_s;
   zcos_t = zcos_s;
 
-  if (run_information.rotate) {
-    rotate_points(xcos_t, ycos_t, zcos_t, run_information.alph, run_information.beta, run_information.gamm);
-    rotate_points(xcos_s, ycos_s, zcos_s, -run_information.alph, -run_information.beta, -run_information.gamm);
-  }
+  // if (run_information.rotate) {
+  //   rotate_points(xcos_t, ycos_t, zcos_t, run_information.alph, run_information.beta, run_information.gamm);
+  //   rotate_points(xcos_s, ycos_s, zcos_s, run_information.alph, -run_information.beta, -run_information.gamm);
+  // }
 
   initialize_condition(run_information, xcos_s, ycos_s, zcos_s, potential);
   if (run_information.balance_condition) {
@@ -83,7 +84,12 @@ int main(int argc, char **argv) {
       // std::cout << "interactions: " << interactions.size() << std::endl;
     }
     begin = std::chrono::steady_clock::now();
-    fast_sum_inverse_biharmonic(run_information, interactions, cube_panels_source, cube_panels_target, xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integrated);
+    if (run_information.use_fmm) {
+      fmm_inverse_bilaplacian(run_information, interactions, cube_panels_source, cube_panels_target, xcos_t, ycos_t, zcos_t, area, potential, point_source_leaf, integrated);
+    } else {
+      fast_sum_inverse_biharmonic(run_information, interactions, cube_panels_source, cube_panels_target, xcos_t, ycos_t, zcos_t, xcos_s, ycos_s, zcos_s, area, potential, integrated);
+    }
+    // 
     sync_updates<double>(integrated, P, ID, &win_integrated, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   } else {

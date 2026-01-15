@@ -234,8 +234,8 @@ void remesh_points(const RunConfig &run_information, const std::vector<std::vect
 		// vormin = std::min(vor1, std::min(vor2, std::min(vor3, std::min(vor4, std::min(vor5, vor6)))));
 		// vormed = 0.5*(vormax+vormin);
 		// vors = 0.5*(vormax-vormin);
-		// vormax = vormed+1.5*vors; // a bit of leeway
-		// vormin = vormed-1.5*vors;
+		// vormax = vormed+1.1*vors; // a bit of leeway
+		// vormin = vormed-1.1*vors;
 		// if ((vor > vormax) or (vor < vormin)) {
 		// 	// monotonicity violation, bilinear interp
 		// 	ivs[0] = dynamics_triangles[curr_level][tri_loc][0];
@@ -296,9 +296,11 @@ int main(int argc, char **argv) {
 	std::vector<double> velxt (run_information.point_count, 0), velyt (run_information.point_count, 0), velzt (run_information.point_count, 0);
 
 	initialize_condition(run_information, coordinates[0], coordinates[1], coordinates[2], vorticity);
+	balance_conditions(vorticity, area);
 	for (int i = 0; i < vorticity.size(); i++) {
 		vorticity[i] /= 86400; // convert vorticity [1/day] to vorticity [1/second]
-		passive_tracer[i] = coordinates[2][i];
+		// passive_tracer[i] = coordinates[2][i];
+		passive_tracer[i] = vorticity[i];
 	}
 
 	MPI_Win_create(&velxt[0], run_information.point_count * sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win_velxt);
@@ -354,6 +356,7 @@ int main(int argc, char **argv) {
 			iy = coordinates[1][j] + velyt[j]*run_information.delta_t/2.0;
 			iz = coordinates[2][j] + velzt[j]*run_information.delta_t/2.0;
 			norm = sqrt(ix*ix+iy*iy+iz*iz);
+			// norm = 1.0;
 			inter_state[0][j] = ix/norm;
 			inter_state[1][j] = iy/norm;
 			inter_state[2][j] = iz/norm;
@@ -375,6 +378,7 @@ int main(int argc, char **argv) {
 			iy = coordinates[1][j] + velyt[j]*run_information.delta_t/2.0;
 			iz = coordinates[2][j] + velzt[j]*run_information.delta_t/2.0;
 			norm = sqrt(ix*ix+iy*iy+iz*iz);
+			// norm = 1.0;
 			inter_state[0][j] = ix/norm;
 			inter_state[1][j] = iy/norm;
 			inter_state[2][j] = iz/norm;
@@ -396,6 +400,7 @@ int main(int argc, char **argv) {
 			iy = coordinates[1][j] + velyt[j]*run_information.delta_t;
 			iz = coordinates[2][j] + velzt[j]*run_information.delta_t;
 			norm = sqrt(ix*ix+iy*iy+iz*iz);
+			// norm = 1.0;
 			inter_state[0][j] = ix/norm;
 			inter_state[1][j] = iy/norm;
 			inter_state[2][j] = iz/norm;
@@ -454,6 +459,9 @@ int main(int argc, char **argv) {
 			write_state(coordinates[1], outpath, "y_" + std::to_string(time) + ".csv");
 			write_state(coordinates[2], outpath, "z_" + std::to_string(time) + ".csv");
 			write_state(passive_tracer, outpath, "tracer_" + std::to_string(time) + ".csv");
+			write_state(velx, outpath, "velx_" + std::to_string(time) + ".csv");
+			write_state(vely, outpath, "vely_" + std::to_string(time) + ".csv");
+			write_state(velz, outpath, "velz_" + std::to_string(time) + ".csv");
 		}
 	}
 

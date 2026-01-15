@@ -8,7 +8,9 @@ add_library(FastSphereSums
     ./fast_sum_interactions/sal_interactions_lat_deriv.cpp
     ./fast_sum_interactions/sal_interactions_lon_deriv.cpp
     ./fmm_interactions/inverse_laplacian_interactions.cpp
+    ./fmm_interactions/inverse_bilaplacian_interactions.cpp
     ./fmm_interactions/bve_interactions.cpp
+    ./fmm_interactions/sal_interactions.cpp
     fast_sum_funcs.cpp
     fmm_funcs.cpp
     general_utils.cpp
@@ -36,7 +38,9 @@ install(FILES
     ./fast_sum_interactions/sal_interactions_lat_deriv.hpp
     ./fast_sum_interactions/sal_interactions_lon_deriv.hpp
     ./fmm_interactions/inverse_laplacian_interactions.hpp
+    ./fmm_interactions/inverse_bilaplacian_interactions.hpp
     ./fmm_interactions/bve_interactions.hpp
+    ./fmm_interactions/salinteractions.hpp
     fast_sum_funcs.hpp
     fumm_funcs.hpp
     initial_conditions.hpp

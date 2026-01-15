@@ -7,6 +7,7 @@
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
 #include "fast_sum_funcs.hpp"
+#include "fmm_funcs.hpp"
 #include "general_utils.hpp"
 #include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
@@ -77,7 +78,8 @@ int main(int argc, char **argv) {
       std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
     }
     begin = std::chrono::steady_clock::now();
-    fast_sum_bve(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated_1, integrated_2, integrated_3);
+    // fast_sum_bve(run_information, interactions, cube_panels, xcos, ycos, zcos, area, potential, integrated_1, integrated_2, integrated_3);
+    fmm_bve(run_information, interactions, cube_panels, cube_panels, xcos, ycos, zcos, area, potential, point_source_leaf, integrated_1, integrated_2, integrated_3);
     sync_updates<double>(integrated_1, P, ID, &win_integrated_1, MPI_DOUBLE);
     sync_updates<double>(integrated_2, P, ID, &win_integrated_2, MPI_DOUBLE);
     sync_updates<double>(integrated_3, P, ID, &win_integrated_3, MPI_DOUBLE);

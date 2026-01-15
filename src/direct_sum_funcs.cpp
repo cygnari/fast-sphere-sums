@@ -2,6 +2,7 @@
 #include <cmath>
 #include "structs.hpp"
 #include "general_utils.hpp"
+#include <iostream>
 
 void direct_sum_invert_laplacian(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, const std::vector<double>& area, const std::vector<double>& potential, std::vector<double>& integral) {
   // perform direct summation to convolve to invert the laplacian

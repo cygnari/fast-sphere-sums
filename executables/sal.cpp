@@ -7,6 +7,7 @@
 #include "fast-sphere-sums-config.h"
 #include "direct_sum_funcs.hpp"
 #include "fast_sum_funcs.hpp"
+#include "fmm_funcs.hpp"
 #include "general_utils.hpp"
 #include "initial_conditions.hpp"
 #include "initialize_tree.hpp"
@@ -74,7 +75,8 @@ int main(int argc, char **argv) {
       std::cout << "tree traversal time: " << std::chrono::duration<double>(end - begin).count() << " seconds" << std::endl;
     }
     begin = std::chrono::steady_clock::now();
-    fast_sum_sal(run_information, interactions, cube_panels, xcos, ycos, zcos, area, sshs, sals);
+    // fast_sum_sal(run_information, interactions, cube_panels, xcos, ycos, zcos, area, sshs, sals);
+    fmm_sal(run_information, interactions, cube_panels, cube_panels, xcos, ycos, zcos, area, sshs, point_source_leaf, sals);
     sync_updates<double>(sals, P, ID, &win_sal, MPI_DOUBLE);
     end = std::chrono::steady_clock::now();
   } else {

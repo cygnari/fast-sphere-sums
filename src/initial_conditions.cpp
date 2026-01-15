@@ -58,6 +58,33 @@ void rh4(const std::vector<double>& xcos, const std::vector<double>& ycos, const
   }
 }
 
+void gv(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  double lat, dist;
+  double center_lat = 0.05 * M_PI;
+  double center_lon = 0.0;
+  double dx, dy, dz;
+  std::vector<double> p1;
+  p1 = latlon_to_xyz(center_lat, center_lon, 1.0);
+  for (int i = 0; i < potential.size(); i++) {
+    // latlon = xyz_to_latlon(xcos[i], ycos[i], zcos[i])
+    // lat = latlon[0];
+    dx = xcos[i] - p1[0];
+    dy = ycos[i] - p1[1];
+    dz = zcos[i] - p1[2];
+    dist = sqrt(dx*dx+dy*dy+dz*dz);
+    potential[i] = 4 * M_PI * exp(-16 * pow(dist, 2));
+  }
+}
+
+void sh_85(const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
+  // real spherical harmonic, degree 4, order 3
+  double x, y, z;
+  for (int i = 0; i < xcos.size(); i++) {
+    x = xcos[i], y = ycos[i], z = zcos[i];
+    potential[i] = (5.0*x*x*x*x*y-10.0*x*x*y*y*y+y*y*y*y*y)*z*(5.0*z*z-1.0);
+  }
+}
+
 void initialize_condition(const RunConfig& run_information, const std::vector<double>& xcos, const std::vector<double>& ycos, const std::vector<double>& zcos, std::vector<double>& potential) {
   // initial condition
   if (run_information.initial_condition == "SH43") {
@@ -75,6 +102,10 @@ void initialize_condition(const RunConfig& run_information, const std::vector<do
     x_cubed(xcos, ycos, zcos, potential);
   } else if (run_information.initial_condition == "RH4") {
     rh4(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "gv") {
+    gv(xcos, ycos, zcos, potential);
+  } else if (run_information.initial_condition == "SH85") {
+    sh_85(xcos, ycos, zcos, potential);
   }
 }
 
